@@ -1,0 +1,21 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PDF Sorter Config (Contains API Key)
+.pdf_sorter_config.json
+
+# IDE
+.vscode/
+.idea/
+
+# Mac OS
+.DS_Store
