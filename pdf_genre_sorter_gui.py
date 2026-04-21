@@ -46,19 +46,47 @@ BORDER  = "#3f3f5a"
 # キーワード辞書（APIなしモード用）
 # ─────────────────────────────
 KEYWORD_GENRES = [
+    ("AI関係", [
+        "ai", "人工知能", "chatgpt", "gemini", "claude", "機械学習", "machine learning",
+        "deep learning", "llm", "生成ai", "プロンプト", "データサイエンス"
+    ]),
     ("技術書・IT", [
         "python", "java", "javascript", "typescript", "programming", "プログラム",
         "software", "ソフトウェア", "html", "css", "api", "algorithm", "アルゴリズム",
         "database", "データベース", "linux", "windows", "network", "ネットワーク",
-        "code", "コード", "git", "docker", "cloud", "クラウド", "ai", "machine learning",
-        "deep learning", "データサイエンス", "開発", "エンジニア"
+        "code", "コード", "git", "docker", "cloud", "クラウド", "開発", "エンジニア"
     ]),
     ("ビジネス・経営", [
         "business", "ビジネス", "management", "経営", "strategy", "戦略",
-        "marketing", "マーケティング", "sales", "営業", "profit", "利益",
-        "revenue", "売上", "project", "プロジェクト", "budget", "予算",
+        "sales", "営業", "profit", "利益", "revenue", "売上", "project", "プロジェクト", "budget", "予算",
         "企業", "会社", "組織", "マネジメント", "リーダーシップ", "起業",
         "生産性", "productivity", "仕事術"
+    ]),
+    ("マーケティング", [
+        "marketing", "マーケティング", "市場", "集客", "プロモーション", "広告", "宣伝", "ターゲット", "ブランディング", "seo"
+    ]),
+    ("心理学", [
+        "心理学", "psychology", "認知", "心理", "カウンセリング", "メンタル", "行動心理", "脳科学"
+    ]),
+    ("自己啓発", [
+        "achievement", "達成", "goal", "目標", "success", "成功", "habit",
+        "習慣", "mindset", "マインド", "diary", "日記", "motivation", "モチベーション",
+        "self", "自己", "growth", "成長", "mandalart", "マンダラート",
+        "haruta", "原田", "手帳", "planner"
+    ]),
+    ("グループワーク", [
+        "グループワーク", "group work", "チームビルディング", "ワークショップ", "ディスカッション", "ファシリテーション", "ブレスト", "ブレインストーミング", "チームワーク"
+    ]),
+    ("報告書", [
+        "報告書", "report", "レポート", "月報", "日報", "結果報告", "調査報告", "活動報告", "実績報告"
+    ]),
+    ("企画書", [
+        "企画書", "proposal", "提案書", "プロジェクト企画", "企画案", "コンペ", "概要"
+    ]),
+    ("説明書", [
+        "説明書", "取扱説明", "manual", "マニュアル", "guide", "ガイド", "instruction", "手順",
+        "how to", "howto", "setup", "セットアップ", "install", "インストール",
+        "操作", "使い方", "tutorial", "チュートリアル", "readme"
     ]),
     ("法律・契約", [
         "contract", "契約", "agreement", "法律", "legal", "law", "規約",
@@ -101,21 +129,10 @@ KEYWORD_GENRES = [
         "rent", "賃貸", "property", "物件", "間取り", "建築", "interior",
         "リフォーム", "住まい", "家賃", "管理"
     ]),
-    ("マニュアル・手順書", [
-        "manual", "マニュアル", "guide", "ガイド", "instruction", "手順",
-        "how to", "howto", "setup", "セットアップ", "install", "インストール",
-        "操作", "使い方", "tutorial", "チュートリアル", "readme"
-    ]),
     ("農業・環境", [
         "農業", "agriculture", "farm", "植物", "plant", "forest", "林業",
         "竹", "bamboo", "伐採", "環境", "environment", "ecology", "エコ",
         "自然", "nature", "土壌", "水", "organic", "有機"
-    ]),
-    ("自己啓発・心理", [
-        "achievement", "達成", "goal", "目標", "success", "成功", "habit",
-        "習慣", "mindset", "マインド", "diary", "日記", "motivation", "モチベーション",
-        "self", "自己", "growth", "成長", "mandalart", "マンダラート",
-        "haruta", "原田", "手帳", "planner"
     ]),
     ("デザイン・アート", [
         "design", "デザイン", "art", "アート", "illustration", "イラスト",
@@ -186,7 +203,7 @@ def classify_with_ai(client, filename: str, text: str) -> tuple[str, str | None]
 **日本語で1〜4語**の短いフォルダ名として答えてください。
 
 ルール:
-- フォルダ名として使えるシンプルな名称にする（例: 技術書, 小説, 料理レシピ, 医療・健康, ビジネス, 法律, 旅行ガイド, マンガ, 学術論文, 語学, 契約書, マニュアル など）
+- フォルダ名として使えるシンプルな名称にする（例: AI関係, 心理学, マーケティング, グループワーク, 報告書, 企画書, 説明書, ビジネス, 法律 など）
 - ジャンルが判断できない場合は「{UNKNOWN_FOLDER}」とだけ答えてください
 - 回答はフォルダ名のみ。説明不要。
 
