@@ -217,14 +217,25 @@ button {
     border-radius: var(--radius-sm);
     font-weight: 700;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
     transition: var(--transition-smooth);
     padding: 12px 20px;
-    flex-direction: row !important;
-    white-space: nowrap !important;
+    border: none;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+button span,
+button .material-icons-round {
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+
+button .material-icons-round {
+    margin-left: 6px;
+    font-size: 20px;
 }
 
 .btn-primary {
@@ -269,13 +280,10 @@ button {
 }
 
 .btn-block {
-    width: 100%;
+    display: block !important;
+    width: 100% !important;
     padding: 14px;
-    display: inline-flex !important;
-    justify-content: center !important;
-    align-items: center !important;
     box-sizing: border-box !important;
-    flex-shrink: 0 !important;
 }
 
 .btn-floating {
