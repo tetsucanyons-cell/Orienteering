@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GVカヌー予約確認</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2d5a27">
+    <meta name="description" content="GVカヌースケジュールをリアルタイムで確認できるモバイルアプリ">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GV予約確認">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="manifest" href="manifest.json?v=2">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* アースカラーのパレット定義 */
+            --bg-gradient: linear-gradient(135deg, #2a472c 0%, #3a5a40 50%, #8c7853 100%);
+            --color-primary: #3a5a40;      /* フォレストグリーン */
+            --color-primary-dark: #2f4835;
+            --color-secondary: #a3b18a;    /* セージグリーン */
+            --color-accent: #d4a373;       /* 温かみのあるブラウン・イエロー */
+            --color-accent-dark: #bc8a5f;
+            --color-earth-brown: #5c4d3c;  /* 樹木のような茶色 */
+            --color-cream: #faf6ee;        /* 優しいクリーム色 */
+            --color-text-dark: #2f3e30;
+            --color-text-light: #ffffff;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.25);
+            --border-radius-sm: 12px;
+            --border-radius-md: 20px;
+            --border-radius-lg: 28px;
+            --safe-area-inset-top: env(safe-area-inset-top, 0px);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--color-cream);
+            min-height: 100vh;
+            padding: calc(var(--safe-area-inset-top) + 15px) 15px calc(var(--safe-area-inset-bottom) + 25px) 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* ヘッダーデザイン */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 5px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: var(--color-cream);
+            padding: 2px;
+            box-shadow: var(--shadow-md);
+            border: 2px solid var(--color-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .brand-text h1 {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--color-cream);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            line-height: 1.2;
+        }
+
+        .brand-text p {
+            font-size: 11px;
+            font-weight: 400;
+            opacity: 0.8;
+            color: var(--color-secondary);
+        }
+
+        /* 更新ボタン */
+        .btn-refresh {
+            background: rgba(250, 246, 238, 0.15);
+            border: 1px solid rgba(250, 246, 238, 0.25);
+            color: var(--color-cream);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-refresh:active {
+            transform: scale(0.9) rotate(-180deg);
+            background: rgba(250, 246, 238, 0.3);
+        }
+
+        .btn-refresh svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .btn-refresh.spinning svg {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* クイック日付選択（スライドカード） */
+        .date-picker-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .section-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--color-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding-left: 5px;
+        }
+
+        .quick-dates-container {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 5px 5px 12px 5px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            width: calc(100% + 10px);
+            margin-left: -5px;
+        }
+
+        .quick-dates-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .date-card {
+            flex: 0 0 75px;
+            height: 85px;
+            background: rgba(250, 246, 238, 0.08);
+            border: 1px solid rgba(250, 246, 238, 0.12);
+            border-radius: var(--border-radius-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.25s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .date-card:active {
+            transform: scale(0.95);
+        }
+
+        .date-card.active {
+            background: var(--color-accent);
+            border-color: var(--color-accent);
+            color: var(--color-earth-brown);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .date-card .month-day {
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .date-card .weekday {
+            font-size: 10px;
+            font-weight: 700;
+            margin-top: 4px;
+            opacity: 0.8;
+            padding: 2px 6px;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .date-card.active .weekday {
+            background: rgba(255,255,255,0.4);
+            color: var(--color-earth-brown);
+        }
+
+        /* セレクトボックス（全日付用） */
+        .select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        select {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 16px;
+            font-family: inherit;
+            font-weight: 700;
+            color: var(--color-text-dark);
+            background-color: var(--color-cream);
+            border: none;
+            border-radius: var(--border-radius-md);
+            cursor: pointer;
+            appearance: none;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(212, 163, 115, 0.4);
+        }
+
+        .select-wrapper::after {
+            content: "▼";
+            font-size: 12px;
+            color: var(--color-earth-brown);
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        /* 詳細表示カード */
+        .event-details-card {
+            background: var(--color-cream);
+            color: var(--color-text-dark);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            display: none;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .event-details-card.show {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* カードヘッダー（日付と開始時間） */
+        .card-header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: var(--color-cream);
+            padding: 24px;
+            position: relative;
+        }
+
+        .card-date-badge {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .card-date {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .card-time {
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--color-accent);
+            color: var(--color-earth-brown);
+            padding: 8px 16px;
+            border-radius: var(--border-radius-sm);
+            font-size: 18px;
+            font-weight: 800;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* カード内容 */
+        .card-body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(58, 90, 64, 0.05);
+            padding: 14px 18px;
+            border-radius: var(--border-radius-sm);
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .info-icon {
+            font-size: 22px;
+            width: 32px;
+            text-align: center;
+        }
+
+        .info-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-dark);
+        }
+
+        /* 参加人数（生徒・教員） */
+        .people-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .people-card {
+            background: rgba(212, 163, 115, 0.1);
+            border: 1px solid rgba(212, 163, 115, 0.2);
+            border-radius: var(--border-radius-sm);
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .people-card.students {
+            border-left: 4px solid var(--color-accent);
+        }
+
+        .people-card.teachers {
+            border-left: 4px solid var(--color-earth-brown);
+        }
+
+        .people-icon {
+            font-size: 20px;
+        }
+
+        .people-count {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--color-text-dark);
+        }
+
+        .people-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #7f8c8d;
+        }
+
+        /* ガイド（出席者）セクション */
+        .guides-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .guides-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            padding-bottom: 6px;
+        }
+
+        .guides-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .guide-badge {
+            background: var(--color-primary);
+            color: var(--color-cream);
+            padding: 8px 14px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .guide-badge.empty {
+            background: #e0e0e0;
+            color: #7f8c8d;
+            box-shadow: none;
+            border: none;
+        }
+
+        .guide-badge.leader {
+            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+            color: var(--color-earth-brown);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 12px rgba(212, 163, 115, 0.3);
+            font-weight: 800;
+        }
+
+        .leader-icon {
+            margin-right: 4px;
+            font-size: 14px;
+        }
+
+        /* メモセクション */
+        .memo-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .memo-box {
+            background: rgba(140, 120, 83, 0.08);
+            border: 1px dashed rgba(140, 120, 83, 0.3);
+            border-radius: var(--border-radius-sm);
+            padding: 16px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #555;
+            min-height: 60px;
+            white-space: pre-wrap;
+        }
+
+        .memo-box.empty {
+            color: #aaa;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ロード／エラーインジケータ */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            gap: 15px;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(250, 246, 238, 0.2);
+            border-top-color: var(--color-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .status-message {
+            font-size: 14px;
+            opacity: 0.8;
+            font-weight: 600;
+        }
+
+        .error-card {
+            background: rgba(192, 57, 43, 0.9);
+            color: white;
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            box-shadow: var(--shadow-md);
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            animation: slideUp 0.3s ease;
+        }
+
+        .error-card.show {
+            display: flex;
+        }
+
+        .error-card h3 {
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .error-card p {
+            font-size: 13px;
+            line-height: 1.4;
+            opacity: 0.9;
+        }
+
+        .btn-retry {
+            align-self: flex-start;
+            background: white;
+            color: #c0392b;
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--border-radius-sm);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-retry:active {
+            transform: scale(0.95);
+        }
+
+        /* 複数イベント切り替えドット */
+        .event-pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .page-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(250, 246, 238, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .page-dot.active {
+            background: var(--color-accent);
+            transform: scale(1.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- ヘッダー -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-logo">🛶</div>
+                <div class="brand-text">
+                    <h1>GVカヌー予約</h1>
+                    <p>Google Sheets Realtime Link</p>
+                </div>
+            </div>
+            <button class="btn-refresh" id="refreshBtn" title="手動更新">
+                <svg viewBox="0 0 24 24">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.57-.57"></path>
+                </svg>
+            </button>
+        </header>
+
+        <!-- ロード表示 -->
+        <div class="loader-container" id="mainLoader">
+            <div class="spinner"></div>
+            <div class="status-message" id="loaderText">データをロード中...</div>
+        </div>
+
+        <!-- エラー表示 -->
+        <div class="error-card" id="errorCard">
+            <h3>⚠️ 接続エラー</h3>
+            <p id="errorText">スプレッドシートの読み込みに失敗しました。共有設定が「リンクを知っている人は閲覧可能」になっているかご確認ください。</p>
+            <button class="btn-retry" id="retryBtn">再試行</button>
+        </div>
+
+        <!-- メインコンテンツ (データ読み込み完了後に表示) -->
+        <main class="date-picker-section" id="mainContent" style="display: none;">
+            <span class="section-label">日付の選択</span>
+            
+            <!-- クイック日付選択（直近の日付） -->
+            <div class="quick-dates-container" id="quickDates">
+                <!-- JSで動的に追加されます -->
+            </div>
+
+            <!-- 全日付用セレクトボックス -->
+            <div class="select-wrapper">
+                <select id="dateSelect">
+                    <option value="">-- すべての日付から選択 --</option>
+                </select>
+            </div>
+        </main>
+
+        <!-- イベント詳細カード -->
+        <div class="event-details-card" id="eventCard">
+            <div id="eventCardContent">
+                <!-- JSで動的に詳細がレンダリングされます -->
+            </div>
+            
+            <!-- 1日に複数イベントがある場合のページネーション -->
+            <div class="event-pagination" id="eventPagination" style="display: none;">
+                <!-- ドットが動的に追加されます -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Google Sheets 設定
+        const SPREADSHEET_ID = "14w-lnEjJjbXw_kpBYDJTov7GjpFtb1ENHr0K6X4q-EM";
+        const SHEET_NAME = "2026年";
+        const CSV_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+
+        // 出席者名（ガイド）定義
+        const ATTENDEES = ["哲さん", "英さん", "羽山さん", "Rez", "バボちゃん", "五島", "FW（どんどん）", "FW（ゆげっち）"];
+
+        // アプリの状態
+        let allEvents = [];
+        let allDates = [];
+        let selectedDate = "";
+        let currentEventIndex = 0; // 同一日に複数イベントがある場合のインデックス
+
+        // DOMの取得
+        const mainLoader = document.getElementById('mainLoader');
+        const loaderText = document.getElementById('loaderText');
+        const errorCard = document.getElementById('errorCard');
+        const errorText = document.getElementById('errorText');
+        const retryBtn = document.getElementById('retryBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const mainContent = document.getElementById('mainContent');
+        const dateSelect = document.getElementById('dateSelect');
+        const quickDates = document.getElementById('quickDates');
+        const eventCard = document.getElementById('eventCard');
+        const eventCardContent = document.getElementById('eventCardContent');
+        const eventPagination = document.getElementById('eventPagination');
+
+        // イベントリスナー
+        document.addEventListener('DOMContentLoaded', initApp);
+        retryBtn.addEventListener('click', () => loadData(true));
+        refreshBtn.addEventListener('click', () => loadData(true));
+        dateSelect.addEventListener('change', (e) => selectDate(e.target.value, 'select'));
+
+        // アプリ起動時の初期化
+        async function initApp() {
+            await loadData(false);
+        }
+
+        // スプレッドシートデータのロード
+        async function loadData(force = false) {
+            showLoader("スプレッドシートに接続中...");
+            hideError();
+            refreshBtn.classList.add('spinning');
+
+            try {
+                // キャッシュ回避のためタイムスタンプを付与
+                const url = force ? `${CSV_URL}&t=${Date.now()}` : CSV_URL;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Googleスプレッドシートへの接続に失敗しました');
+
+                const csvText = await response.text();
+                const values = parseCSV(csvText);
+
+                if (!values || values.length < 2) {
+                    throw new Error('スプレッドシートから有効なデータが見つかりませんでした');
+                }
+
+                allEvents = parseEventData(values);
+                
+                // ユニークな日付一覧を取得してソート
+                allDates = [...new Set(allEvents.map(e => e.date).filter(Boolean))];
+                // 日付を日付の若い順（昇順）に適切にソート
+                allDates.sort((a, b) => {
+                    const dateA = parseToDate(a);
+                    const dateB = parseToDate(b);
+                    if (dateA && dateB) {
+                        return dateA - dateB;
+                    }
+                    return a.localeCompare(b);
+                });
+
+                if (allDates.length === 0) {
+                    throw new Error('スケジュール日付が見つかりませんでした');
+                }
+
+                // UIの構築
+                buildDatePickerUI();
+                
+                hideLoader();
+                mainContent.style.display = 'flex';
+                
+                // 初期選択：今日の日付に最も近い日付、または最初の日付
+                selectNearestDate();
+
+            } catch (error) {
+                console.error("Error loading data:", error);
+                showError(error.message);
+                hideLoader();
+            } finally {
+                refreshBtn.classList.remove('spinning');
+            }
+        }
+
+        // CSVパーサー（ダブルクォーテーションを正しく処理）
+        function parseCSV(text) {
+            const lines = [];
+            let row = [""];
+            let inQuotes = false;
+            
+            for (let i = 0; i < text.length; i++) {
+                let c = text[i];
+                let next = text[i+1];
+                
+                if (c === '"') {
+                    if (inQuotes && next === '"') {
+                        row[row.length - 1] += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (c === ',') {
+                    if (inQuotes) {
+                        row[row.length - 1] += ',';
+                    } else {
+                        row.push("");
+                    }
+                } else if (c === '\r' || c === '\n') {
+                    if (inQuotes) {
+                        row[row.length - 1] += c;
+                    } else {
+                        if (c === '\r' && next === '\n') {
+                            i++;
+                        }
+                        lines.push(row.map(cell => cell.trim()));
+                        row = [""];
+                    }
+                } else {
+                    row[row.length - 1] += c;
+                }
+            }
+            if (row.length > 1 || row[0] !== "") {
+                lines.push(row.map(cell => cell.trim()));
+            }
+            return lines;
+        }
+
+        // スプレッドシートデータのパース
+        function parseEventData(values) {
+            const headers = values[0];
+            
+            // デフォルトインデックス
+            let dateIdx = 1;      // 日付列は通常2列目 (B列、0-indexedで1)
+            let timeIdx = 2;      // 開始時間は通常3列目 (C列、0-indexedで2)
+            let schoolIdx = 3;    // 学校名は通常4列目 (D列、0-indexedで3)
+            let studentsIdx = 4;  // 生徒数は通常5列目 (E列、0-indexedで4)
+            let teachersIdx = 5;  // 教員数は通常6列目 (F列、0-indexedで5)
+            
+            // ヘッダー名から正確なインデックスを動的に検索
+            for (let i = 0; i < headers.length; i++) {
+                const header = headers[i].trim();
+                if (header.includes("日付")) dateIdx = i;
+                else if (header.includes("開始") || header.includes("時間")) timeIdx = i;
+                else if (header.includes("学校") || header.includes("団体")) schoolIdx = i;
+                else if (header.includes("生徒") || header.includes("児童") || header.includes("人数")) studentsIdx = i;
+                else if (header.includes("教員") || header.includes("引率") || header.includes("先生")) teachersIdx = i;
+            }
+
+            // 各ガイドがどの列にいるかを動的にマッピング
+            const guideCols = {};
+            
+            // 実際のCSVにおけるガイドの正しい並び順（インデックス8から）
+            const defaultGuideOrder = [
+                { name: "哲さん", defaultIdx: 8 },
+                { name: "羽山さん", defaultIdx: 9 },
+                { name: "英さん", defaultIdx: 10 },
+                { name: "Rez", defaultIdx: 11 },
+                { name: "バボちゃん", defaultIdx: 12 },
+                { name: "五島", defaultIdx: 13 },
+                { name: "FW（どんどん）", defaultIdx: 14 },
+                { name: "FW（ゆげっち）", defaultIdx: 15 }
+            ];
+
+            // 1. ヘッダー名から動的に一致する列を探す
+            ATTENDEES.forEach(name => {
+                const cleanName = name.replace("さん", "").replace(/（.*）/, "").trim();
+                const idx = headers.findIndex(h => {
+                    const cleanH = h.trim();
+                    if (!cleanH) return false;
+                    return cleanH.includes(cleanName) || cleanName.includes(cleanH);
+                });
+                if (idx !== -1) {
+                    guideCols[name] = idx;
+                }
+            });
+
+            // 2. 見つからなかったガイドについて、実際のCSVの並び順（デフォルト位置）を適用
+            defaultGuideOrder.forEach(item => {
+                if (guideCols[item.name] === undefined) {
+                    guideCols[item.name] = item.defaultIdx;
+                }
+            });
+
+            // 運営リーダー列を特定
+            let leaderIdx = -1;
+            for (let i = 0; i < headers.length; i++) {
+                const h = headers[i].trim();
+                if (h.includes("運営リーダー") || h.includes("リーダー")) {
+                    leaderIdx = i;
+                    break;
+                }
+            }
+            if (leaderIdx === -1) {
+                leaderIdx = 19; // デフォルトはT列（20列目、0-indexedで19）
+            }
+
+            // メモ列を特定
+            let memoIdx = -1;
+            for (let i = 0; i < headers.length; i++) {
+                const h = headers[i].trim();
+                if (h.includes("メモ") || h.includes("備考") || h.includes("連絡") || h === "メ" || h === "モ") {
+                    memoIdx = i;
+                    break;
+                }
+            }
+            if (memoIdx === -1) {
+                memoIdx = 20; // デフォルトはU列（21列目）
+            }
+
+            const events = [];
+            
+            for (let i = 1; i < values.length; i++) {
+                const row = values[i];
+                if (row.length <= dateIdx) continue;
+
+                const dateVal = row[dateIdx].trim();
+                if (!dateVal) continue; // 日付空行はスキップ
+
+                const timeVal = row[timeIdx] ? row[timeIdx].trim() : "";
+                const schoolVal = row[schoolIdx] ? row[schoolIdx].trim() : "";
+                const studentsVal = row[studentsIdx] ? row[studentsIdx].trim() : "";
+                const teachersVal = row[teachersIdx] ? row[teachersIdx].trim() : "";
+                const memoVal = row[memoIdx] ? row[memoIdx].trim() : "";
+                const leaderVal = row[leaderIdx] ? row[leaderIdx].trim() : "";
+
+                // 出席者（○やOなどがついているメンバー）
+                const attendees = [];
+                ATTENDEES.forEach(name => {
+                    const colIdx = guideCols[name];
+                    if (colIdx < row.length) {
+                        const cellVal = row[colIdx].trim();
+                        // 大文字Oや○のほかに、トリムされた値が空欄でなく、不参加記号(×,-,~など)でもない場合も考慮する
+                        const isAbsent = ["×", "x", "X", "-", "ー", "~", "―"].includes(cellVal) || cellVal === "";
+                        const isPresent = ["○", "〇", "o", "O", "1", "OK", "出席", "ok"].includes(cellVal) || (!isAbsent);
+                        if (isPresent) {
+                            attendees.push(name);
+                        }
+                    }
+                });
+
+                events.push({
+                    date: dateVal,
+                    time: timeVal,
+                    school: schoolVal,
+                    students: studentsVal,
+                    teachers: teachersVal,
+                    attendees: attendees,
+                    leader: leaderVal,
+                    memo: memoVal
+                });
+            }
+
+            return events;
+        }
+
+        // 日付選択UIの構築
+        function buildDatePickerUI() {
+            // 1. セレクトボックスのクリアと追加
+            while (dateSelect.options.length > 1) {
+                dateSelect.remove(1);
+            }
+            allDates.forEach(date => {
+                const option = document.createElement('option');
+                option.value = date;
+                option.textContent = date;
+                dateSelect.appendChild(option);
+            });
+
+            // 2. クイック日付選択（直近の未来のスケジュール6日間を表示）
+            quickDates.innerHTML = "";
+            
+            // ブラウザを見た日（今日）以降のスケジュールを6個抽出して表示
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // 比較のために時間をクリア
+            
+            let displayDates = allDates.filter(d => {
+                const dateObj = parseToDate(d);
+                return dateObj && dateObj >= today;
+            }).slice(0, 6);
+            
+            // もし未来の日付が1つもない（すべて過去のスケジュール）場合は、リストの最後（最新）から6個を表示
+            if (displayDates.length === 0) {
+                displayDates = allDates.slice(-6);
+            }
+
+            displayDates.forEach(date => {
+                const card = document.createElement('div');
+                card.className = 'date-card';
+                card.dataset.date = date;
+                
+                // 日付をパースして表示用フォーマット（MM/DD等）に
+                const parsedDate = parseDateString(date);
+                
+                const monthDaySpan = document.createElement('span');
+                monthDaySpan.className = 'month-day';
+                monthDaySpan.textContent = parsedDate.display;
+                
+                const weekdaySpan = document.createElement('span');
+                weekdaySpan.className = 'weekday';
+                weekdaySpan.textContent = parsedDate.weekday;
+                
+                card.appendChild(monthDaySpan);
+                card.appendChild(weekdaySpan);
+                
+                card.addEventListener('click', () => selectDate(date, 'card'));
+                quickDates.appendChild(card);
+            });
+        }
+
+        // 日付の選択処理
+        function selectDate(date, source = 'select') {
+            if (!date) {
+                eventCard.classList.remove('show');
+                return;
+            }
+
+            selectedDate = date;
+            currentEventIndex = 0;
+
+            // UIの選択表示同期
+            if (source === 'select') {
+                // クイックカードの選択状態をクリア、該当カードがあればactiveに
+                document.querySelectorAll('.date-card').forEach(card => {
+                    if (card.dataset.date === date) {
+                        card.classList.add('active');
+                        card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    } else {
+                        card.classList.remove('active');
+                    }
+                });
+            } else {
+                // セレクトボックスの同期
+                dateSelect.value = date;
+                // クイックカードのactive化
+                document.querySelectorAll('.date-card').forEach(card => {
+                    if (card.dataset.date === date) {
+                        card.classList.add('active');
+                    } else {
+                        card.classList.remove('active');
+                    }
+                });
+            }
+
+            renderEventDetails();
+        }
+
+        // 選択日付に近いものを自動選択
+        function selectNearestDate() {
+            if (allDates.length === 0) return;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // 比較のために時間をリセット
+
+            let nearestDate = allDates[0];
+            
+            // 今日以降で日付オブジェクトにパースできる未来の日付をフィルタリング
+            const futureDates = allDates.filter(d => {
+                const dateObj = parseToDate(d);
+                return dateObj && dateObj >= today;
+            });
+
+            if (futureDates.length > 0) {
+                // すでにソートされているので、最初の要素が今日以降で最も近い日付になります
+                nearestDate = futureDates[0];
+            } else {
+                // 未来の日付がない場合は、最も今日に近い過去の日付（リストの最後）を選択
+                nearestDate = allDates[allDates.length - 1];
+            }
+            
+            selectDate(nearestDate, 'select');
+        }
+
+        // 該当日のイベント詳細をレンダリング
+        function renderEventDetails() {
+            const matchedEvents = allEvents.filter(e => e.date === selectedDate);
+            
+            if (matchedEvents.length === 0) {
+                eventCard.classList.remove('show');
+                return;
+            }
+
+            // 同一日内の現在インデックスのイベントを取得
+            const event = matchedEvents[currentEventIndex];
+
+            // ページネーション（複数イベント対応）の制御
+            if (matchedEvents.length > 1) {
+                eventPagination.style.display = 'flex';
+                eventPagination.innerHTML = "";
+                for (let i = 0; i < matchedEvents.length; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = `page-dot ${i === currentEventIndex ? 'active' : ''}`;
+                    dot.addEventListener('click', () => {
+                        currentEventIndex = i;
+                        renderEventDetails();
+                    });
+                    eventPagination.appendChild(dot);
+                }
+            } else {
+                eventPagination.style.display = 'none';
+            }
+
+            // ガイドバッジの生成
+            let guidesHtml = "";
+            let attendeesList = [...(event.attendees || [])];
+            const leaderName = event.leader ? event.leader.trim() : "";
+
+            if (leaderName) {
+                // 出席メンバーからリーダーを除去
+                attendeesList = attendeesList.filter(name => name !== leaderName);
+                // 先頭にリーダーを追加
+                attendeesList.unshift(leaderName);
+            }
+
+            if (attendeesList.length > 0) {
+                guidesHtml = attendeesList.map(name => {
+                    if (name === leaderName) {
+                        return `<span class="guide-badge leader"><span class="leader-icon">👑</span>${name}</span>`;
+                    }
+                    return `<span class="guide-badge">${name}</span>`;
+                }).join('');
+            } else {
+                guidesHtml = `<span class="guide-badge empty">出席ガイドなし</span>`;
+            }
+
+            // メモのパース
+            const memoHtml = event.memo && event.memo.trim() 
+                ? `<div class="memo-box">${event.memo}</div>` 
+                : `<div class="memo-box empty">メモや特記事項はありません。</div>`;
+
+            // HTMLの挿入
+            eventCardContent.innerHTML = `
+                <div class="card-header">
+                    <div class="card-date-badge">
+                        <span class="card-date">${selectedDate}</span>
+                    </div>
+                    <span class="card-time">${event.time || '未定'}</span>
+                </div>
+                <div class="card-body">
+                    <div class="info-row">
+                        <span class="info-icon">🏫</span>
+                        <div class="info-content">
+                            <span class="info-label">団体名・学校名</span>
+                            <span class="info-value">${event.school || '一般・個別予約等'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="people-container">
+                        <div class="people-card students">
+                            <span class="people-icon">🎒</span>
+                            <div>
+                                <div class="people-count">${event.students || '0'}</div>
+                                <div class="people-label">生徒数</div>
+                            </div>
+                        </div>
+                        <div class="people-card teachers">
+                            <span class="people-icon">👨‍🏫</span>
+                            <div>
+                                <div class="people-count">${event.teachers || '0'}</div>
+                                <div class="people-label">教員数</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="guides-section">
+                        <span class="guides-title">🛶 出席ガイド (${event.attendees ? event.attendees.length : 0}名)</span>
+                        <div class="guides-grid">
+                            ${guidesHtml}
+                        </div>
+                    </div>
+
+                    <div class="memo-section">
+                        <span class="guides-title">📝 スケジュールメモ</span>
+                        ${memoHtml}
+                    </div>
+                </div>
+            `;
+
+            eventCard.classList.add('show');
+        }
+
+        // ユーティリティ: 今日の日付文字列を取得 (YYYY/MM/DD 等のスプレッドシートの日付形式に合わせる)
+        function getTodayString() {
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            const d = String(today.getDate()).padStart(2, '0');
+            
+            // スプレッドシート内の日付書式に合わせるための仮の比較フォーマット
+            return `${y}/${m}/${d}`; 
+        }
+
+        // ユーティリティ: スプレッドシートの日付文字列をJavaScript Dateオブジェクトに変換する
+        // 対応形式: "2026/06/07", "6/7", "5月14日", "2026年5月14日" など
+        function parseToDate(dateStr) {
+            if (!dateStr) return null;
+            const now = new Date();
+            let year = 2026; // デフォルト設定（2026年度スケジュールのため2026固定）
+            let month = -1;
+            let day = -1;
+
+            // 年の抽出
+            const yearMatch = dateStr.match(/(\d{4})[/\-年]/);
+            if (yearMatch) {
+                year = parseInt(yearMatch[1], 10);
+            }
+
+            // 「月日」の抽出
+            // 1. "5月14日" などの形式
+            const jpMatch = dateStr.match(/(\d{1,2})月(\d{1,2})日/);
+            if (jpMatch) {
+                month = parseInt(jpMatch[1], 10) - 1;
+                day = parseInt(jpMatch[2], 10);
+            } else {
+                // 2. "5/14" や "05-14" などのスラッシュ/ハイフン形式
+                const cleanStr = dateStr.replace(/^\d{4}[/\-年]/, '');
+                const slashMatch = cleanStr.match(/(\d{1,2})[/\-](\d{1,2})/);
+                if (slashMatch) {
+                    month = parseInt(slashMatch[1], 10) - 1;
+                    day = parseInt(slashMatch[2], 10);
+                }
+            }
+
+            if (month >= 0 && day > 0) {
+                return new Date(year, month, day);
+            }
+            return null;
+        }
+
+        // ユーティリティ: スプレッドシートの日付文字列をパースして表示用パーツを生成
+        // 例: "2026/06/07" や "5月14日" 等
+        function parseDateString(dateStr) {
+            let m = "";
+            let d = "";
+            
+            const dateObj = parseToDate(dateStr);
+            if (dateObj) {
+                m = dateObj.getMonth() + 1;
+                d = dateObj.getDate();
+                const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+                const w = weekdays[dateObj.getDay()];
+                return {
+                    display: `${m}/${d}`,
+                    weekday: `${w}曜日`
+                };
+            }
+            
+            return { display: dateStr, weekday: '🛶' };
+        }
+
+        // UI表示制御ユーティリティ
+        function showLoader(text) {
+            loaderText.textContent = text;
+            mainLoader.style.display = 'flex';
+        }
+
+        function hideLoader() {
+            mainLoader.style.display = 'none';
+        }
+
+        function showError(msg) {
+            errorText.textContent = msg;
+            errorCard.classList.add('show');
+            eventCard.classList.remove('show');
+        }
+
+        function hideError() {
+            errorCard.classList.remove('show');
+        }
+    </script>
+</body>
+</html>

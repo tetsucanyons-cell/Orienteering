@@ -1,0 +1,21 @@
+{
+  "short_name": "GV予約確認",
+  "name": "GVカヌー予約確認サイト",
+  "icons": [
+    {
+      "src": "icon.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "https://tetsucanyons-cell.github.io/gv-schedule/",
+  "background_color": "#2c3e2e",
+  "theme_color": "#4a7c59",
+  "display": "standalone",
+  "orientation": "portrait"
+}
