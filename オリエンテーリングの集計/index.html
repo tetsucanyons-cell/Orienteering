@@ -38,19 +38,60 @@
                         <span class="material-icons-round text-emerald">settings</span>
                         <h2>大会の初期設定</h2>
                     </div>
-                    <p class="card-desc">参加するチーム数を設定してください。チーム名は後から個別に変更可能です。</p>
+                    <p class="card-desc">クラスとチーム番号のルールを選択し、各クラスのチーム数を指定してください。</p>
                     
+                    <!-- クラス表記の選択 -->
                     <div class="form-group">
-                        <label for="input-team-count">チーム数 (最大100)</label>
-                        <div class="input-number-wrapper">
-                            <input type="number" id="input-team-count" min="1" max="100" value="10" inputmode="numeric">
-                            <span class="input-unit">チーム</span>
+                        <label>クラスの表記</label>
+                        <div class="segmented-control">
+                            <input type="radio" id="class-type-alpha" name="class-type" value="alpha" checked>
+                            <label for="class-type-alpha">アルファベット (A, B...)</label>
+                            
+                            <input type="radio" id="class-type-num" name="class-type" value="num">
+                            <label for="class-type-num">数字 (1組, 2組...)</label>
+                        </div>
+                    </div>
+
+                    <!-- 対象クラスの選択 -->
+                    <div class="form-group">
+                        <label>対象クラスを選択</label>
+                        <div id="grid-class-checkboxes" class="class-checkbox-grid">
+                            <!-- JSで動的にチェックボックスが挿入されます -->
+                        </div>
+                    </div>
+
+                    <!-- チーム番号のルール -->
+                    <div class="form-group">
+                        <label>チーム番号のルール</label>
+                        <div class="segmented-control">
+                            <input type="radio" id="number-rule-seq" name="number-rule" value="seq" checked>
+                            <label for="number-rule-seq">学年連番 (A-1, A-2, B-3...)</label>
+                            
+                            <input type="radio" id="number-rule-reset" name="number-rule" value="reset">
+                            <label for="number-rule-reset">クラスごと (A-1, A-2, B-1...)</label>
+                        </div>
+                    </div>
+
+                    <!-- クラス別のチーム数設定 -->
+                    <div class="form-group">
+                        <label>各クラスのチーム数</label>
+                        <div id="list-class-team-counts" class="class-team-counts-list">
+                            <!-- チェックされたクラスのチーム数入力欄がここに表示されます -->
+                        </div>
+                    </div>
+
+                    <!-- 設定チーム数の合計表示 -->
+                    <div class="form-group total-teams-display">
+                        <div class="total-teams-badge">
+                            <span>設定チーム数 合計: </span>
+                            <strong id="span-total-teams">0</strong>
+                            <span> チーム</span>
                         </div>
                     </div>
                     
                     <button id="btn-start-setup" class="btn-primary btn-block">
-                        <span>チーム設定に進む</span>
-                        <span class="material-icons-round">arrow_forward</span>
+                        <span>チーム名自動生成に進む</span>
+                        <span class="material-icons-round">magic_button</span>
                     </button>
                 </div>
 
