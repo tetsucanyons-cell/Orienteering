@@ -217,12 +217,14 @@ button {
     border-radius: var(--radius-sm);
     font-weight: 700;
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     transition: var(--transition-smooth);
     padding: 12px 20px;
+    flex-direction: row !important;
+    white-space: nowrap !important;
 }
 
 .btn-primary {
@@ -269,9 +271,11 @@ button {
 .btn-block {
     width: 100%;
     padding: 14px;
-    display: flex !important;
+    display: inline-flex !important;
     justify-content: center !important;
     align-items: center !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
 }
 
 .btn-floating {
