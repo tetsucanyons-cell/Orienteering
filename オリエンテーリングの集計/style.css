@@ -707,6 +707,21 @@ button {
 /* ==========================================================================
    Print Layout (A4 optimized)
    ========================================================================== */
+/* 画面表示時のページコンテナカード */
+.print-page-block {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    padding: 24px;
+    box-shadow: var(--shadow-subtle);
+    margin-bottom: 24px;
+    transition: var(--transition-smooth);
+}
+
+.print-page-block:hover {
+    box-shadow: var(--shadow-medium);
+}
+
 .print-header {
     display: block; /* 画面・印刷両方で表示 */
     margin-bottom: 20px;
@@ -729,7 +744,7 @@ button {
 }
 
 @media print {
-    /* A4用紙の余白設定 (上下8mm、左右12mmに縮小して印刷領域を拡大) */
+    /* A4用紙の余白設定 (上下8mm、左右12mm) */
     @page {
         size: A4 portrait;
         margin: 8mm 12mm;
@@ -762,6 +777,22 @@ button {
         display: block !important;
     }
     
+    /* 印刷時の改ページ強制指定 */
+    .print-page-block {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin-bottom: 0 !important;
+        page-break-after: always !important;
+        break-after: page !important;
+    }
+    
+    .print-page-block:last-child {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+    }
+    
     /* 印刷用ヘッダーの余白・文字サイズ調整 */
     .print-header {
         display: block !important;
@@ -783,7 +814,7 @@ button {
         margin-top: 2px;
     }
 
-    /* 印刷用テーブルの最適化 (最大50行を1ページに収めるための極薄パディング) */
+    /* 印刷用テーブルの最適化 */
     .ranking-card {
         border: none !important;
         box-shadow: none !important;
@@ -792,25 +823,43 @@ button {
     }
 
     .styled-table {
-        font-size: 8.5pt;
         width: 100%;
     }
 
     .styled-table th {
-        background-color: #e9ecef !important; /* インク節約しつつ見やすい薄いグレー背景 */
+        background-color: #e9ecef !important;
         color: black !important;
         border: 1px solid #ccc;
-        padding: 4px 6px !important;
         font-weight: 700;
     }
 
     .styled-table td {
         border: 1px solid #ddd;
-        padding: 4px 6px !important;
-        line-height: 1.2;
     }
 
-    /* 偶数行に非常に薄いグレーの網掛けを設定（print-color-adjustにより強制表示） */
+    /* 密度調整：30チーム以下 (density-low) */
+    .density-low th {
+        padding: 6px 10px !important;
+        font-size: 10pt !important;
+    }
+    .density-low td {
+        padding: 6px 10px !important;
+        font-size: 10pt !important;
+        line-height: 1.3 !important;
+    }
+
+    /* 密度調整：31〜35チーム (density-high) */
+    .density-high th {
+        padding: 3px 5px !important;
+        font-size: 8.5pt !important;
+    }
+    .density-high td {
+        padding: 3px 5px !important;
+        font-size: 8.5pt !important;
+        line-height: 1.15 !important;
+    }
+
+    /* 偶数行に非常に薄いグレーの網掛けを設定 */
     .styled-table tbody tr {
         background-color: white !important;
     }
