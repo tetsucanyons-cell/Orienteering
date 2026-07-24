@@ -511,8 +511,11 @@ function renderRanking() {
         return;
     }
 
-    // 学校名・大会名をタイトルに反映
-    const title = state.schoolName ? `${state.schoolName} 結果順位表` : '結果順位表';
+    // 学校名・大会名と合計チーム数をタイトルに反映
+    const teamCountText = `(全${state.teams.length}チーム)`;
+    const title = state.schoolName 
+        ? `${state.schoolName} ${teamCountText} 結果順位表` 
+        : `結果順位表 ${teamCountText}`;
     printSchoolName.textContent = title;
 
     // 出力日を反映
