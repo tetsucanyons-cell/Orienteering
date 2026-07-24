@@ -217,7 +217,7 @@ button {
     border-radius: var(--radius-sm);
     font-weight: 700;
     cursor: pointer;
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
@@ -269,6 +269,9 @@ button {
 .btn-block {
     width: 100%;
     padding: 14px;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
 }
 
 .btn-floating {
