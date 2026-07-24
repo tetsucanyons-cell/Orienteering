@@ -19,3 +19,20 @@ __pycache__/
 
 # Mac OS
 .DS_Store
+
+# Other Projects (Exclude from Orienteering repo)
+/AudioBlogProject/
+/GVカヌー予定アプリ/
+/GV予約確認サイト/
+/YOUTUBE要約一覧作成/
+/まとめてZIP/
+/みなかみ町インタープリター/
+/携帯集計表/
+/音声認識アプリ/
+/竹について/
+/心理学YTチャンネル/
+/workman_deals_api/
+/build/
+/dist/
+/オリエンテーリングの集計/
+*.spec
