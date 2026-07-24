@@ -4,6 +4,7 @@
 
 // --- アプリケーションの状態管理 ---
 let state = {
+    schoolName: '',           // 学校名・大会名
     classType: 'alpha',       // 'alpha' (A, B...) or 'num' (1組, 2組...)
     selectedClasses: ['A', 'B', 'C', 'D'], // デフォルトで最初の4クラス
     numberRule: 'seq',        // 'seq' (全体連番) or 'reset' (クラスごと)
@@ -43,6 +44,8 @@ const printDateEl = document.getElementById('print-current-date');
 const btnResetAll = document.getElementById('btn-reset-all');
 
 // 新規追加されたDOM要素
+const inputSchoolName = document.getElementById('input-school-name');
+const printSchoolName = document.getElementById('print-school-name');
 const radioClassTypes = document.getElementsByName('class-type');
 const gridClassCheckboxes = document.getElementById('grid-class-checkboxes');
 const radioNumberRules = document.getElementsByName('number-rule');
@@ -85,6 +88,12 @@ function initApp() {
 // --- イベントリスナーの設定 ---
 function setupEventListeners() {
     // 1. 設定画面
+    // 学校名入力イベント
+    inputSchoolName.addEventListener('input', (e) => {
+        state.schoolName = e.currentTarget.value.trim();
+        saveState();
+    });
+
     // クラス表記切り替えイベント
     radioClassTypes.forEach(radio => {
         radio.addEventListener('change', handleClassTypeChange);
@@ -167,6 +176,9 @@ function switchView(sectionId) {
 
 // 保存された/デフォルトのstateを初期設定画面に適用
 function applyStateToSetupUI() {
+    // 学校名の適用
+    inputSchoolName.value = state.schoolName || '';
+
     // クラス表記ラジオボタンの適用
     radioClassTypes.forEach(radio => {
         if (radio.value === state.classType) {
@@ -493,6 +505,10 @@ function handleSearch() {
 
 // --- 順位表セクション ロジック ---
 function renderRanking() {
+    // タイトルに学校名・大会名を反映
+    const title = state.schoolName ? `${state.schoolName} 結果順位表` : '結果順位表';
+    printSchoolName.textContent = title;
+
     tableRankingBody.innerHTML = '';
 
     // スコア降順でソート（ディープコピーを作成）
@@ -552,6 +568,7 @@ function hideResetModal() {
 function resetAllData() {
     // 状態のクリア
     state = {
+        schoolName: '',
         classType: 'alpha',
         selectedClasses: ['A', 'B', 'C', 'D'],
         numberRule: 'seq',
@@ -567,6 +584,7 @@ function resetAllData() {
     };
     
     // 入力のクリア
+    inputSchoolName.value = '';
     listTeamNames.innerHTML = '';
     divTeamNamesSetup.classList.add('hidden');
     listScoreInputs.innerHTML = '';

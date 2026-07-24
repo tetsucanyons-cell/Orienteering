@@ -708,15 +708,40 @@ button {
    Print Layout (A4 optimized)
    ========================================================================== */
 .print-header {
-    display: none;
+    display: block; /* 画面・印刷両方で表示 */
+    margin-bottom: 20px;
+    border-bottom: 2px dashed var(--border-color);
+    padding-bottom: 12px;
+}
+
+.print-header h2 {
+    font-size: 20px;
+    color: var(--color-primary-dark);
+    text-align: center;
+    font-weight: 700;
+}
+
+.print-date {
+    text-align: right;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
 }
 
 @media print {
-    /* Hide everything that is NOT the ranking section */
+    /* A4用紙の余白設定 (上下8mm、左右12mmに縮小して印刷領域を拡大) */
+    @page {
+        size: A4 portrait;
+        margin: 8mm 12mm;
+    }
+
+    /* 印刷時の背景色（網掛け）出力を強制 */
     body {
         background: white !important;
         color: black !important;
-        font-size: 12pt;
+        font-size: 9pt;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
     
     .app-container {
@@ -737,26 +762,28 @@ button {
         display: block !important;
     }
     
-    /* Document header for print */
+    /* 印刷用ヘッダーの余白・文字サイズ調整 */
     .print-header {
         display: block !important;
-        margin-bottom: 20px;
+        margin-bottom: 12px;
         border-bottom: 2px solid #000;
-        padding-bottom: 10px;
+        padding-bottom: 6px;
     }
     
     .print-header h2 {
-        font-size: 20pt;
+        font-size: 15pt;
         text-align: center;
+        font-weight: 700;
     }
     
     .print-date {
         text-align: right;
-        font-size: 10pt;
-        color: #555;
+        font-size: 8pt;
+        color: #333;
+        margin-top: 2px;
     }
 
-    /* Print friendly ranking card */
+    /* 印刷用テーブルの最適化 (最大50行を1ページに収めるための極薄パディング) */
     .ranking-card {
         border: none !important;
         box-shadow: none !important;
@@ -765,22 +792,31 @@ button {
     }
 
     .styled-table {
-        font-size: 10pt;
+        font-size: 8.5pt;
+        width: 100%;
     }
 
     .styled-table th {
-        background-color: #f2f2f2 !important;
+        background-color: #e9ecef !important; /* インク節約しつつ見やすい薄いグレー背景 */
         color: black !important;
-        border: 1px solid #ddd;
+        border: 1px solid #ccc;
+        padding: 4px 6px !important;
+        font-weight: 700;
     }
 
     .styled-table td {
         border: 1px solid #ddd;
-        padding: 8px 12px !important;
+        padding: 4px 6px !important;
+        line-height: 1.2;
     }
 
+    /* 偶数行に非常に薄いグレーの網掛けを設定（print-color-adjustにより強制表示） */
     .styled-table tbody tr {
-        background-color: transparent !important;
+        background-color: white !important;
+    }
+
+    .styled-table tbody tr:nth-of-type(even) {
+        background-color: #f5f5f5 !important;
     }
     
     .rank-badge {
@@ -790,10 +826,12 @@ button {
         font-weight: bold;
         width: auto;
         height: auto;
+        font-size: 9pt;
     }
     
     .col-total {
         color: black !important;
+        font-weight: 700;
     }
     
     .text-danger {
