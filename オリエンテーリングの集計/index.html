@@ -153,6 +153,12 @@
 
             <!-- 3. ランキング・印刷セクション -->
             <section id="sec-ranking" class="app-section">
+                <!-- 印刷時にのみ表示されるA4ヘッダー -->
+                <div class="print-header">
+                    <h2 id="print-school-name">結果順位表</h2>
+                    <p class="print-date" id="print-current-date"></p>
+                </div>
+
                 <div class="ranking-actions no-print">
                     <button id="btn-back-to-input" class="btn-secondary">
                         <span class="material-icons-round">arrow_back</span>
@@ -164,8 +170,25 @@
                     </button>
                 </div>
 
-                <!-- JavaScriptによって動的に各ページブロック（.print-page-block）が挿入されます -->
-                <div id="ranking-print-area"></div>
+                <div class="card ranking-card">
+                    <div class="table-container">
+                        <table id="table-ranking" class="styled-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-rank">順位</th>
+                                    <th class="col-team">チーム名</th>
+                                    <th class="col-score text-right">基本課題</th>
+                                    <th class="col-score text-right">特別課題</th>
+                                    <th class="col-score text-right text-danger">マイナス</th>
+                                    <th class="col-total text-right">合計点</th>
+                                </tr>
+                            </thead>
+                            <tbody id="body-ranking">
+                                <!-- 動的に順位表データが追加されます -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </section>
         </main>
 

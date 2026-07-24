@@ -505,97 +505,53 @@ function handleSearch() {
 
 // --- 順位表セクション ロジック ---
 function renderRanking() {
-    const rankingPrintArea = document.getElementById('ranking-print-area');
-    rankingPrintArea.innerHTML = '';
+    tableRankingBody.innerHTML = '';
 
     if (state.teams.length === 0) {
-        rankingPrintArea.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 14px;">データがありません。初期設定を完了してください。</div>';
         return;
+    }
+
+    // 学校名・大会名をタイトルに反映
+    const title = state.schoolName ? `${state.schoolName} 結果順位表` : '結果順位表';
+    printSchoolName.textContent = title;
+
+    // 出力日を反映
+    const today = new Date();
+    const dateString = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+    if (printDateEl) {
+        printDateEl.textContent = `出力日: ${dateString}`;
     }
 
     // スコア降順でソート（ディープコピーを作成）
     const sortedTeams = [...state.teams].sort((a, b) => b.totalScore - a.totalScore);
 
-    // 全体の順位を一括で算出 (共同順位対応)
+    // 順位付け処理 (共同順位対応)
     let currentRank = 1;
     let prevScore = null;
+
     sortedTeams.forEach((team, index) => {
         if (prevScore !== null && team.totalScore !== prevScore) {
             currentRank = index + 1;
         }
         prevScore = team.totalScore;
-        team.calculatedRank = currentRank;
-    });
 
-    const N = sortedTeams.length;
-    const maxLimit = 35; // 1ページ最大35チーム
-    const P = Math.ceil(N / maxLimit) || 1; // 必要ページ数
-    const size = Math.ceil(N / P);         // 1ページあたりのチーム数 (均等割り計算)
+        const tr = document.createElement('tr');
+        
+        let rankDisplay = `<span class="rank-badge">${currentRank}</span>`;
+        if (currentRank === 1) rankDisplay = `<span class="rank-badge rank-1">🥇</span>`;
+        else if (currentRank === 2) rankDisplay = `<span class="rank-badge rank-2">🥈</span>`;
+        else if (currentRank === 3) rankDisplay = `<span class="rank-badge rank-3">🥉</span>`;
 
-    // 印刷用の今日の日付
-    const today = new Date();
-    const dateString = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
-
-    for (let pageIdx = 0; pageIdx < P; pageIdx++) {
-        const start = pageIdx * size;
-        const pageTeams = sortedTeams.slice(start, start + size);
-        if (pageTeams.length === 0) break;
-
-        // ページブロックコンテナの作成
-        const pageBlock = document.createElement('div');
-        pageBlock.className = 'print-page-block animate-fade-in';
-
-        // 1ページ内のチーム数に応じた密度クラス (30チーム以下は低密度、31〜35チームは高密度)
-        const densityClass = size <= 30 ? 'density-low' : 'density-high';
-
-        // タイトルの決定
-        const mainTitle = state.schoolName ? `${state.schoolName} 結果順位表` : '結果順位表';
-        const pageTitle = P > 1 ? `${mainTitle} (${pageIdx + 1} / ${P} ページ)` : mainTitle;
-
-        let tableRowsHTML = '';
-        pageTeams.forEach(team => {
-            let rankDisplay = `<span class="rank-badge">${team.calculatedRank}</span>`;
-            if (team.calculatedRank === 1) rankDisplay = `<span class="rank-badge rank-1">🥇</span>`;
-            else if (team.calculatedRank === 2) rankDisplay = `<span class="rank-badge rank-2">🥈</span>`;
-            else if (team.calculatedRank === 3) rankDisplay = `<span class="rank-badge rank-3">🥉</span>`;
-
-            tableRowsHTML += `
-                <tr>
-                    <td class="col-rank">${rankDisplay}</td>
-                    <td class="col-team">${escapeHTML(team.name)}</td>
-                    <td class="col-score text-right">${team.baseScore}</td>
-                    <td class="col-score text-right">${team.specialScore}</td>
-                    <td class="col-score text-right text-danger">${team.penaltyScore}</td>
-                    <td class="col-total text-right">${team.totalScore}</td>
-                </tr>
-            `;
-        });
-
-        pageBlock.innerHTML = `
-            <div class="print-header">
-                <h2>${escapeHTML(pageTitle)}</h2>
-                <p class="print-date">出力日: ${dateString}</p>
-            </div>
-            <div class="table-container">
-                <table class="styled-table ${densityClass}">
-                    <thead>
-                        <tr>
-                            <th class="col-rank">順位</th>
-                            <th class="col-team">チーム名</th>
-                            <th class="col-score text-right">基本課題</th>
-                            <th class="col-score text-right">特別課題</th>
-                            <th class="col-score text-right text-danger">マイナス</th>
-                            <th class="col-total text-right">合計点</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${tableRowsHTML}
-                    </tbody>
-                </table>
-            </div>
+        tr.innerHTML = `
+            <td class="col-rank">${rankDisplay}</td>
+            <td class="col-team">${escapeHTML(team.name)}</td>
+            <td class="col-score text-right">${team.baseScore}</td>
+            <td class="col-score text-right">${team.specialScore}</td>
+            <td class="col-score text-right text-danger">${team.penaltyScore}</td>
+            <td class="col-total text-right">${team.totalScore}</td>
         `;
-        rankingPrintArea.appendChild(pageBlock);
-    }
+        tableRankingBody.appendChild(tr);
+    });
 }
 
 // 印刷の実行
@@ -638,8 +594,7 @@ function resetAllData() {
     inputSearchTeam.value = '';
     
     // 表示のクリア
-    const rankingPrintArea = document.getElementById('ranking-print-area');
-    if (rankingPrintArea) rankingPrintArea.innerHTML = '';
+    tableRankingBody.innerHTML = '';
 
     // UIを初期状態に再描画
     applyStateToSetupUI();

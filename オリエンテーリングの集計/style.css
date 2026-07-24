@@ -754,7 +754,7 @@ button {
     body {
         background: white !important;
         color: black !important;
-        font-size: 9pt;
+        font-size: 8.5pt !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
@@ -777,86 +777,60 @@ button {
         display: block !important;
     }
     
-    /* 印刷時の改ページ強制指定 */
-    .print-page-block {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        margin-bottom: 0 !important;
-        page-break-after: always !important;
-        break-after: page !important;
-    }
-    
-    .print-page-block:last-child {
-        page-break-after: avoid !important;
-        break-after: avoid !important;
-    }
-    
     /* 印刷用ヘッダーの余白・文字サイズ調整 */
     .print-header {
         display: block !important;
-        margin-bottom: 12px;
-        border-bottom: 2px solid #000;
-        padding-bottom: 6px;
+        margin-bottom: 12px !important;
+        border-bottom: 2px solid #000 !important;
+        padding-bottom: 6px !important;
     }
     
     .print-header h2 {
-        font-size: 15pt;
+        font-size: 14pt !important;
         text-align: center;
         font-weight: 700;
     }
     
     .print-date {
         text-align: right;
-        font-size: 8pt;
+        font-size: 8pt !important;
         color: #333;
         margin-top: 2px;
     }
 
-    /* 印刷用テーブルの最適化 */
+    /* 印刷用テーブルの最適化 (最大35〜40行をA4縦1ページに収める極薄パディング) */
     .ranking-card {
         border: none !important;
         box-shadow: none !important;
         background: transparent !important;
         padding: 0 !important;
+        margin-bottom: 0 !important;
     }
 
     .styled-table {
-        width: 100%;
+        font-size: 8.5pt !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
     }
 
     .styled-table th {
         background-color: #e9ecef !important;
         color: black !important;
-        border: 1px solid #ccc;
+        border: 1px solid #ccc !important;
+        padding: 3px 6px !important;
         font-weight: 700;
     }
 
     .styled-table td {
-        border: 1px solid #ddd;
-    }
-
-    /* 密度調整：30チーム以下 (density-low) */
-    .density-low th {
-        padding: 6px 10px !important;
-        font-size: 10pt !important;
-    }
-    .density-low td {
-        padding: 6px 10px !important;
-        font-size: 10pt !important;
-        line-height: 1.3 !important;
-    }
-
-    /* 密度調整：31〜35チーム (density-high) */
-    .density-high th {
-        padding: 3px 5px !important;
-        font-size: 8.5pt !important;
-    }
-    .density-high td {
-        padding: 3px 5px !important;
-        font-size: 8.5pt !important;
+        border: 1px solid #ddd !important;
+        padding: 3px 6px !important;
         line-height: 1.15 !important;
+    }
+
+    /* テーブル行が途中で改ページされるのを防止 */
+    .styled-table tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 
     /* 偶数行に非常に薄いグレーの網掛けを設定 */
@@ -875,7 +849,7 @@ button {
         font-weight: bold;
         width: auto;
         height: auto;
-        font-size: 9pt;
+        font-size: 8.5pt !important;
     }
     
     .col-total {
