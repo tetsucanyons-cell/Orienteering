@@ -72,6 +72,13 @@ function detectDevice() {
     // タッチデバイス、または画面幅768px未満をモバイルと判定
     const isMobile = isSmallScreen || (isTouch && window.innerWidth < 1024);
     
+    // デバッグ表示の更新
+    const dbg = document.getElementById('debug-badge');
+    if (dbg) {
+        dbg.textContent = `DBG: w=${window.innerWidth}, touch=${isTouch ? 'Y' : 'N'}, mob=${isMobile ? 'Y' : 'N'}`;
+        dbg.style.backgroundColor = isMobile ? '#2a9d8f' : '#2b2d42';
+    }
+    
     if (isMobile) {
         document.body.classList.add('is-mobile');
         document.body.classList.remove('is-pc');
