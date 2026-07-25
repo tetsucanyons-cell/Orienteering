@@ -38,7 +38,6 @@ const listScoreInputs = document.getElementById('list-score-inputs');
 const inputSearchTeam = document.getElementById('input-search-team');
 const btnGoToRanking = document.getElementById('btn-go-to-ranking');
 const tableRankingBody = document.getElementById('body-ranking');
-const btnBackToInput = document.getElementById('btn-back-to-input');
 const btnPrint = document.getElementById('btn-print');
 const btnExportCsv = document.getElementById('btn-export-csv');
 const printDateEl = document.getElementById('print-current-date');
@@ -227,10 +226,6 @@ function setupEventListeners() {
     btnGoToRanking.addEventListener('click', () => {
         renderRanking();
         switchView('sec-ranking');
-    });
-
-    btnBackToInput.addEventListener('click', () => {
-        switchView('sec-input');
     });
 
     // 4. 印刷機能

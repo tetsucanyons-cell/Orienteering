@@ -586,9 +586,13 @@ button .material-icons-round {
    ========================================================================== */
 .ranking-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: stretch;
     gap: 12px;
     margin-bottom: 16px;
+}
+
+.ranking-actions button {
+    flex: 1;
 }
 
 .ranking-card {
