@@ -1062,3 +1062,89 @@ button .material-icons-round {
     font-family: 'Outfit', sans-serif;
 }
 
+/* ==========================================================================
+   Responsive & Hybrid Input Styles (Plan D)
+   ========================================================================== */
+
+/* Responsive visibility utilities */
+@media (min-width: 768px) {
+    .mobile-only {
+        display: none !important;
+    }
+    .pc-only {
+        display: block !important;
+    }
+    span.pc-only, div.pc-only.inline-wrapper {
+        display: inline-block !important;
+    }
+}
+@media (max-width: 767px) {
+    .mobile-only {
+        display: block !important;
+    }
+    span.mobile-only, div.mobile-only.inline-wrapper {
+        display: inline-block !important;
+    }
+    .pc-only {
+        display: none !important;
+    }
+}
+
+/* Stepper & Select styling */
+.input-select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.class-select-input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid #ced4da;
+    background-color: #ffffff;
+    outline: none;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-main);
+    transition: var(--transition-smooth);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232b2d42'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 24px;
+}
+
+.class-select-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.15);
+}
+
+/* Detail view select style inside accordion */
+.class-count-row select {
+    width: 70px;
+    padding: 6px 8px;
+    border: 1px solid #ced4da;
+    border-radius: var(--radius-sm);
+    text-align: right;
+    font-weight: 700;
+    outline: none;
+    background-color: #ffffff;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232b2d42'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 16px;
+    padding-right: 20px;
+}
+
+.class-count-row select:focus {
+    border-color: var(--color-primary);
+}
+
+.inline-wrapper {
+    display: inline-block;
+}
+

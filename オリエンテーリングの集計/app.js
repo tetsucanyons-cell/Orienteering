@@ -44,8 +44,10 @@ const btnResetAll = document.getElementById('btn-reset-all');
 const inputSchoolName = document.getElementById('input-school-name');
 const printSchoolName = document.getElementById('print-school-name');
 const radioClassTypes = document.getElementsByName('class-type');
-const inputClassCount = document.getElementById('input-class-count');
-const inputBulkTeamCount = document.getElementById('input-bulk-team-count');
+const inputClassCountPc = document.getElementById('input-class-count-pc');
+const inputClassCountMob = document.getElementById('input-class-count-mob');
+const inputBulkTeamCountPc = document.getElementById('input-bulk-team-count-pc');
+const inputBulkTeamCountMob = document.getElementById('input-bulk-team-count-mob');
 const btnToggleDetails = document.getElementById('btn-toggle-details');
 const divClassDetails = document.getElementById('div-class-details');
 const radioNumberRules = document.getElementsByName('number-rule');
@@ -99,11 +101,25 @@ function setupEventListeners() {
         radio.addEventListener('change', handleClassTypeChange);
     });
 
-    // クラス数変更イベント
-    inputClassCount.addEventListener('input', handleClassCountChange);
+    // クラス数変更イベント (PC / スマホ両方の同期と処理)
+    inputClassCountPc.addEventListener('input', (e) => {
+        inputClassCountMob.value = e.currentTarget.value;
+        handleClassCountChange(e);
+    });
+    inputClassCountMob.addEventListener('change', (e) => {
+        inputClassCountPc.value = e.currentTarget.value;
+        handleClassCountChange(e);
+    });
 
-    // 一括チーム数変更イベント
-    inputBulkTeamCount.addEventListener('input', handleBulkTeamCountChange);
+    // 一括チーム数変更イベント (PC / スマホ両方の同期と処理)
+    inputBulkTeamCountPc.addEventListener('input', (e) => {
+        inputBulkTeamCountMob.value = e.currentTarget.value;
+        handleBulkTeamCountChange(e);
+    });
+    inputBulkTeamCountMob.addEventListener('change', (e) => {
+        inputBulkTeamCountPc.value = e.currentTarget.value;
+        handleBulkTeamCountChange(e);
+    });
 
     // 詳細設定（個別調整）アコーディオン開閉
     btnToggleDetails.addEventListener('click', toggleClassDetails);
@@ -195,11 +211,15 @@ function applyStateToSetupUI() {
         }
     });
 
-    // クラス数の適用
-    inputClassCount.value = state.classCount || 4;
+    // クラス数の適用 (PC/スマホ両方)
+    const classCount = state.classCount || 8;
+    inputClassCountPc.value = classCount;
+    inputClassCountMob.value = classCount;
 
-    // 一括チーム数の適用
-    inputBulkTeamCount.value = state.bulkTeamCount || 6;
+    // 一括チーム数の適用 (PC/スマホ両方)
+    const bulkCount = state.bulkTeamCount || 6;
+    inputBulkTeamCountPc.value = bulkCount;
+    inputBulkTeamCountMob.value = bulkCount;
 
     // 番号ルールラジオボタンの適用
     radioNumberRules.forEach(radio => {
@@ -218,7 +238,7 @@ function applyStateToSetupUI() {
 // クラス名リストを動的生成する
 function generateClasses() {
     const list = [];
-    const count = Math.min(Math.max(parseInt(state.classCount) || 4, 1), 20);
+    const count = Math.min(Math.max(parseInt(state.classCount) || 8, 1), 20);
     state.classCount = count; // 値の補正
 
     if (state.classType === 'alpha') {
@@ -279,6 +299,16 @@ function toggleClassDetails() {
     btnToggleDetails.classList.toggle('open', !isHidden);
 }
 
+// セレクトボックスのオプションHTML生成ヘルパー
+function generateOptionsHtml(min, max, selectedVal) {
+    let html = '';
+    const sel = parseInt(selectedVal);
+    for (let i = min; i <= max; i++) {
+        html += `<option value="${i}" ${i === sel ? 'selected' : ''}>${i}</option>`;
+    }
+    return html;
+}
+
 // クラス別のチーム数入力リストのレンダリング
 function renderClassTeamCountsInputs() {
     listClassTeamCounts.innerHTML = '';
@@ -298,13 +328,33 @@ function renderClassTeamCountsInputs() {
 
         row.innerHTML = `
             <span>${cls}クラス</span>
-            <input type="number" min="1" max="30" value="${count}" data-class="${cls}" class="class-team-count-input" inputmode="numeric">
+            <!-- PC用 -->
+            <div class="pc-only inline-wrapper">
+                <input type="number" min="1" max="30" value="${count}" data-class="${cls}" class="class-team-count-input-pc" inputmode="numeric">
+            </div>
+            <!-- スマホ用 -->
+            <div class="mobile-only inline-wrapper">
+                <select data-class="${cls}" class="class-team-count-input-mob">
+                    ${generateOptionsHtml(1, 30, count)}
+                </select>
+            </div>
         `;
         listClassTeamCounts.appendChild(row);
 
         // イベント登録
-        row.querySelector('input').addEventListener('input', handleClassTeamCountChange);
-        row.querySelector('input').addEventListener('focus', (e) => e.currentTarget.select());
+        const pcInput = row.querySelector('.class-team-count-input-pc');
+        const mobSelect = row.querySelector('.class-team-count-input-mob');
+
+        pcInput.addEventListener('input', (e) => {
+            mobSelect.value = e.currentTarget.value;
+            handleClassTeamCountChange(e);
+        });
+        pcInput.addEventListener('focus', (e) => e.currentTarget.select());
+
+        mobSelect.addEventListener('change', (e) => {
+            pcInput.value = e.currentTarget.value;
+            handleClassTeamCountChange(e);
+        });
     });
 
     updateTotalTeamsDisplay();
@@ -601,8 +651,10 @@ function resetAllData() {
     
     // 入力のクリア
     inputSchoolName.value = '';
-    inputClassCount.value = 8;
-    inputBulkTeamCount.value = 6;
+    inputClassCountPc.value = 8;
+    inputClassCountMob.value = 8;
+    inputBulkTeamCountPc.value = 6;
+    inputBulkTeamCountMob.value = 6;
     divClassDetails.classList.add('hidden');
     btnToggleDetails.classList.remove('open');
     listTeamNames.innerHTML = '';

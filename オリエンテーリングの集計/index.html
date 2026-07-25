@@ -65,9 +65,35 @@
 
                     <!-- クラス数の設定 -->
                     <div class="form-group">
-                        <label for="input-class-count">クラス数 (1〜20)</label>
-                        <div class="input-number-wrapper">
-                            <input type="number" id="input-class-count" min="1" max="20" value="8" inputmode="numeric">
+                        <label for="input-class-count-pc">クラス数 (1〜20)</label>
+                        <!-- PC用 -->
+                        <div class="input-number-wrapper pc-only">
+                            <input type="number" id="input-class-count-pc" min="1" max="20" value="8" inputmode="numeric">
+                        </div>
+                        <!-- スマホ用 -->
+                        <div class="input-select-wrapper mobile-only">
+                            <select id="input-class-count-mob" class="class-select-input">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8" selected>8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15">15</option>
+                                <option value="16">16</option>
+                                <option value="17">17</option>
+                                <option value="18">18</option>
+                                <option value="19">19</option>
+                                <option value="20">20</option>
+                            </select>
                         </div>
                     </div>
 
@@ -85,9 +111,45 @@
 
                     <!-- 各クラスのチーム数設定（一括設定） -->
                     <div class="form-group">
-                        <label for="input-bulk-team-count">各クラスのチーム数 (一括設定)</label>
-                        <div class="input-number-wrapper">
-                            <input type="number" id="input-bulk-team-count" min="1" max="30" value="6" inputmode="numeric">
+                        <label for="input-bulk-team-count-pc">各クラスのチーム数 (一括設定)</label>
+                        <!-- PC用 -->
+                        <div class="input-number-wrapper pc-only">
+                            <input type="number" id="input-bulk-team-count-pc" min="1" max="30" value="6" inputmode="numeric">
+                        </div>
+                        <!-- スマホ用 -->
+                        <div class="input-select-wrapper mobile-only">
+                            <select id="input-bulk-team-count-mob" class="class-select-input">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6" selected>6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15">15</option>
+                                <option value="16">16</option>
+                                <option value="17">17</option>
+                                <option value="18">18</option>
+                                <option value="19">19</option>
+                                <option value="20">20</option>
+                                <option value="21">21</option>
+                                <option value="22">22</option>
+                                <option value="23">23</option>
+                                <option value="24">24</option>
+                                <option value="25">25</option>
+                                <option value="26">26</option>
+                                <option value="27">27</option>
+                                <option value="28">28</option>
+                                <option value="29">29</option>
+                                <option value="30">30</option>
+                            </select>
                         </div>
                     </div>
 
