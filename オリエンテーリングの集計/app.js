@@ -115,49 +115,65 @@ function initApp() {
 function setupEventListeners() {
     // 1. 設定画面
     // 学校名入力イベント
-    inputSchoolName.addEventListener('input', (e) => {
-        state.schoolName = e.currentTarget.value.trim();
-        saveState();
-    });
-
-    // クラス表記切り替えイベント
-    radioClassTypes.forEach(radio => {
-        radio.addEventListener('change', handleClassTypeChange);
-    });
-
-    // クラス数変更イベント (PC / スマホ両方の同期と処理)
-    inputClassCountPc.addEventListener('input', (e) => {
-        inputClassCountMob.value = e.currentTarget.value;
-        handleClassCountChange(e);
-    });
-    inputClassCountMob.addEventListener('change', (e) => {
-        inputClassCountPc.value = e.currentTarget.value;
-        handleClassCountChange(e);
-    });
-
-    // 一括チーム数変更イベント (PC / スマホ両方の同期と処理)
-    inputBulkTeamCountPc.addEventListener('input', (e) => {
-        inputBulkTeamCountMob.value = e.currentTarget.value;
-        handleBulkTeamCountChange(e);
-    });
-    inputBulkTeamCountMob.addEventListener('change', (e) => {
-        inputBulkTeamCountPc.value = e.currentTarget.value;
-        handleBulkTeamCountChange(e);
-    });
-
-    // 詳細設定（個別調整）アコーディオン開閉
-    btnToggleDetails.addEventListener('click', toggleClassDetails);
-
-    // チーム番号ルール切り替えイベント
-    radioNumberRules.forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            state.numberRule = e.currentTarget.value;
+    if (inputSchoolName) {
+        inputSchoolName.addEventListener('input', (e) => {
+            state.schoolName = e.currentTarget.value.trim();
             saveState();
         });
-    });
+    }
 
-    btnStartSetup.addEventListener('click', handleStartSetup);
-    btnConfirmNames.addEventListener('click', handleConfirmNames);
+    // クラス表記切り替えイベント
+    if (radioClassTypes) {
+        radioClassTypes.forEach(radio => {
+            radio.addEventListener('change', handleClassTypeChange);
+        });
+    }
+
+    // クラス数変更イベント (PC / スマホ両方の同期と処理)
+    if (inputClassCountPc) {
+        inputClassCountPc.addEventListener('input', (e) => {
+            if (inputClassCountMob) inputClassCountMob.value = e.currentTarget.value;
+            handleClassCountChange(e);
+        });
+    }
+    if (inputClassCountMob) {
+        inputClassCountMob.addEventListener('change', (e) => {
+            if (inputClassCountPc) inputClassCountPc.value = e.currentTarget.value;
+            handleClassCountChange(e);
+        });
+    }
+
+    // 一括チーム数変更イベント (PC / スマホ両方の同期と処理)
+    if (inputBulkTeamCountPc) {
+        inputBulkTeamCountPc.addEventListener('input', (e) => {
+            if (inputBulkTeamCountMob) inputBulkTeamCountMob.value = e.currentTarget.value;
+            handleBulkTeamCountChange(e);
+        });
+    }
+    if (inputBulkTeamCountMob) {
+        inputBulkTeamCountMob.addEventListener('change', (e) => {
+            if (inputBulkTeamCountPc) inputBulkTeamCountPc.value = e.currentTarget.value;
+            handleBulkTeamCountChange(e);
+        });
+    }
+
+    // 詳細設定（個別調整）アコーディオン開閉
+    if (btnToggleDetails) {
+        btnToggleDetails.addEventListener('click', toggleClassDetails);
+    }
+
+    // チーム番号ルール切り替えイベント
+    if (radioNumberRules) {
+        radioNumberRules.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                state.numberRule = e.currentTarget.value;
+                saveState();
+            });
+        });
+    }
+
+    if (btnStartSetup) btnStartSetup.addEventListener('click', handleStartSetup);
+    if (btnConfirmNames) btnConfirmNames.addEventListener('click', handleConfirmNames);
 
     // 2. 入力画面の検索
     inputSearchTeam.addEventListener('input', handleSearch);
@@ -226,31 +242,35 @@ function switchView(sectionId) {
 // 保存された/デフォルトのstateを初期設定画面に適用
 function applyStateToSetupUI() {
     // 学校名の適用
-    inputSchoolName.value = state.schoolName || '';
+    if (inputSchoolName) inputSchoolName.value = state.schoolName || '';
 
     // クラス表記ラジオボタンの適用
-    radioClassTypes.forEach(radio => {
-        if (radio.value === state.classType) {
-            radio.checked = true;
-        }
-    });
+    if (radioClassTypes) {
+        radioClassTypes.forEach(radio => {
+            if (radio.value === state.classType) {
+                radio.checked = true;
+            }
+        });
+    }
 
     // クラス数の適用 (PC/スマホ両方)
     const classCount = state.classCount || 8;
-    inputClassCountPc.value = classCount;
-    inputClassCountMob.value = classCount;
+    if (inputClassCountPc) inputClassCountPc.value = classCount;
+    if (inputClassCountMob) inputClassCountMob.value = classCount;
 
     // 一括チーム数の適用 (PC/スマホ両方)
     const bulkCount = state.bulkTeamCount || 6;
-    inputBulkTeamCountPc.value = bulkCount;
-    inputBulkTeamCountMob.value = bulkCount;
+    if (inputBulkTeamCountPc) inputBulkTeamCountPc.value = bulkCount;
+    if (inputBulkTeamCountMob) inputBulkTeamCountMob.value = bulkCount;
 
     // 番号ルールラジオボタンの適用
-    radioNumberRules.forEach(radio => {
-        if (radio.value === state.numberRule) {
-            radio.checked = true;
-        }
-    });
+    if (radioNumberRules) {
+        radioNumberRules.forEach(radio => {
+            if (radio.value === state.numberRule) {
+                radio.checked = true;
+            }
+        });
+    }
 
     // クラス名リストを生成
     generateClasses();
