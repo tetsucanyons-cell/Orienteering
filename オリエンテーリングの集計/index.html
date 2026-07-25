@@ -116,7 +116,7 @@
                         <label for="input-bulk-team-count-mob" class="mobile-only">各クラスのチーム数 (一括設定)</label>
                         <!-- PC用 -->
                         <div class="input-number-wrapper pc-only">
-                            <input type="number" id="input-bulk-team-count-pc" min="1" max="30" value="6" inputmode="numeric">
+                            <input type="number" id="input-bulk-team-count-pc" min="0" max="30" value="6" inputmode="numeric">
                         </div>
                         <!-- スマホ用 -->
                         <div class="input-select-wrapper mobile-only">
@@ -217,6 +217,11 @@
                         <span class="material-icons-round search-icon">search</span>
                         <input type="text" id="input-search-team" placeholder="チーム名で検索...">
                     </div>
+                    <div class="filter-group-container">
+                        <button type="button" class="btn-filter-group active" data-filter="all">すべて</button>
+                        <button type="button" class="btn-filter-group" data-filter="1">前半日程</button>
+                        <button type="button" class="btn-filter-group" data-filter="2">後半日程</button>
+                    </div>
                 </div>
 
                 <div id="list-score-inputs" class="score-card-grid">
@@ -236,6 +241,7 @@
                 <!-- 印刷時にのみ表示されるA4ヘッダー -->
                 <div class="print-header">
                     <h2 id="print-school-name">結果順位表</h2>
+                    <h3 id="print-ranking-subtitle" class="print-subtitle">総合</h3>
                     <p class="print-date" id="print-current-date"></p>
                 </div>
 
@@ -248,6 +254,13 @@
                         <span class="material-icons-round">print</span>
                         <span>A4印刷 (PDF出力)</span>
                     </button>
+                </div>
+
+                <!-- 順位表の表示切り替えタブ (印刷時は非表示) -->
+                <div class="ranking-tabs-container no-print">
+                    <button class="ranking-tab active" data-filter="all">総合順位</button>
+                    <button class="ranking-tab" data-filter="1">前半（日程1）順位</button>
+                    <button class="ranking-tab" data-filter="2">後半（日程2）順位</button>
                 </div>
 
                 <div class="card ranking-card">

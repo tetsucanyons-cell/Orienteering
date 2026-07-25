@@ -1209,3 +1209,153 @@ body.is-pc div.pc-only.inline-wrapper {
     border-color: var(--color-danger);
 }
 
+/* ==========================================================================
+   Split Schedule & Ranking Tab Styles
+   ========================================================================== */
+
+/* Class Count Row Controls in Accordion */
+.class-row-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.class-control-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.class-control-item .control-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.class-group-select {
+    padding: 6px 8px;
+    border: 1px solid #ced4da;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    background-color: #ffffff;
+    font-size: 13px;
+    color: var(--text-main);
+    outline: none;
+    cursor: pointer;
+}
+
+.class-group-select:focus {
+    border-color: var(--color-primary);
+}
+
+/* Input View Filter Groups */
+.filter-group-container {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    width: 100%;
+}
+
+.btn-filter-group {
+    flex: 1;
+    background: #f1f3f5;
+    border: 1px solid #dee2e6;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    outline: none;
+    text-align: center;
+}
+
+.btn-filter-group:hover {
+    background: #e9ecef;
+}
+
+.btn-filter-group.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+    box-shadow: 0 4px 6px rgba(45, 106, 79, 0.15);
+}
+
+/* Ranking Table Tab Menu */
+.ranking-tabs-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 2px;
+}
+
+.ranking-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 10px 12px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    position: relative;
+    outline: none;
+    text-align: center;
+}
+
+.ranking-tab:hover {
+    color: var(--color-primary);
+}
+
+.ranking-tab.active {
+    color: var(--color-primary-dark);
+}
+
+.ranking-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: var(--color-primary);
+    border-radius: 2px;
+}
+
+/* Print Subtitle */
+.print-subtitle {
+    display: none;
+    font-size: 14px;
+    color: #495057;
+    margin-top: 4px;
+    font-weight: 600;
+}
+
+@media print {
+    .print-subtitle {
+        display: block;
+    }
+}
+
+/* Mobile responsive adjustments for Filters */
+@media (max-width: 576px) {
+    .search-bar-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filter-group-container {
+        margin-top: 10px;
+    }
+    .ranking-tabs-container {
+        gap: 4px;
+    }
+    .ranking-tab {
+        font-size: 12px;
+        padding: 8px 4px;
+    }
+}
+
+

@@ -10,7 +10,10 @@ let state = {
     selectedClasses: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'], // クラス名リスト
     bulkTeamCount: 6,         // 各クラスのチーム数一括設定 (初期値: 6)
     numberRule: 'seq',        // 'seq' (全体連番) or 'reset' (クラスごと)
-    classTeamCounts: {},      // 個別のクラスチーム数設定（空の場合はbulkTeamCountを使用）
+    classTeamCounts: {},      // 個別のクラスチーム数設定（空の場合はbulkTeamCountを使用。0を許容）
+    classGroups: {},          // クラスごとの日程グループ。例: { 'A': '1', 'B': '1', 'D': '2' }
+    activeInputFilter: 'all', // 得点入力画面での表示フィルター ('all' | '1' | '2')
+    activeRankingFilter: 'all', // 順位表での集計・表示フィルター ('all' | '1' | '2')
     teamCount: 48,            // 合計チーム数 (初期値: 8クラス * 6チーム = 48)
     teams: [],
     currentView: 'sec-setup'
@@ -86,6 +89,7 @@ function initApp() {
     
     // ローカルストレージからデータを復元
     if (loadState()) {
+        applyFiltersToUI();
         if (state.teams && state.teams.length > 0) {
             // データがすでに存在する場合、設定画面をスキップして入力画面または前回の画面を表示
             renderScoreInputs();
@@ -101,6 +105,36 @@ function initApp() {
         // デフォルト状態で初期描画
         applyStateToSetupUI();
         switchView('sec-setup');
+    }
+}
+
+function applyFiltersToUI() {
+    const inputFilter = state.activeInputFilter || 'all';
+    const filterInputBtns = document.querySelectorAll('.btn-filter-group');
+    filterInputBtns.forEach(btn => {
+        if (btn.getAttribute('data-filter') === inputFilter) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    const rankingFilter = state.activeRankingFilter || 'all';
+    const filterRankingTabs = document.querySelectorAll('.ranking-tab');
+    filterRankingTabs.forEach(tab => {
+        if (tab.getAttribute('data-filter') === rankingFilter) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+
+    const subtitleEl = document.getElementById('print-ranking-subtitle');
+    if (subtitleEl) {
+        const activeTab = document.querySelector('.ranking-tab.active');
+        if (activeTab) {
+            subtitleEl.textContent = activeTab.textContent.replace('順位', '');
+        }
     }
 }
 
@@ -202,9 +236,41 @@ function setupEventListeners() {
     btnPrint.addEventListener('click', handlePrint);
 
     // 5. リセット（初期化）機能
-    btnResetAll.addEventListener('click', showResetModal);
-    btnConfirmCancel.addEventListener('click', hideResetModal);
-    btnConfirmDelete.addEventListener('click', resetAllData);
+    if (btnResetAll) btnResetAll.addEventListener('click', showResetModal);
+    if (btnConfirmCancel) btnConfirmCancel.addEventListener('click', hideResetModal);
+    if (btnConfirmDelete) btnConfirmDelete.addEventListener('click', resetAllData);
+
+    // 6. 日程（グループ）別フィルター（得点入力画面）
+    const filterInputBtns = document.querySelectorAll('.btn-filter-group');
+    filterInputBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            filterInputBtns.forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            state.activeInputFilter = e.currentTarget.getAttribute('data-filter');
+            saveState();
+            renderScoreInputs(); // 再描画
+        });
+    });
+
+    // 7. 日程（グループ）別集計タブ（順位表画面）
+    const filterRankingTabs = document.querySelectorAll('.ranking-tab');
+    filterRankingTabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            filterRankingTabs.forEach(t => t.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            state.activeRankingFilter = e.currentTarget.getAttribute('data-filter');
+            
+            // 印刷用サブタイトルの更新
+            const subtitleEl = document.getElementById('print-ranking-subtitle');
+            if (subtitleEl) {
+                const filterText = e.currentTarget.textContent.replace('順位', '');
+                subtitleEl.textContent = filterText;
+            }
+            
+            saveState();
+            renderRanking(); // 順位表の再計算と描画
+        });
+    });
 }
 
 // --- 画面切り替え ---
@@ -316,7 +382,7 @@ function handleClassCountChange(e) {
 // 一括チーム数が変更された際の処理
 function handleBulkTeamCountChange(e) {
     let count = parseInt(e.currentTarget.value);
-    if (isNaN(count) || count < 1) count = 1;
+    if (isNaN(count) || count < 0) count = 0;
     if (count > 30) count = 30;
 
     state.bulkTeamCount = count;
@@ -348,6 +414,7 @@ function generateOptionsHtml(min, max, selectedVal) {
 
 // クラス別のチーム数入力リストのレンダリング
 function renderClassTeamCountsInputs() {
+    if (!listClassTeamCounts) return;
     listClassTeamCounts.innerHTML = '';
 
     if (state.selectedClasses.length === 0) {
@@ -362,18 +429,34 @@ function renderClassTeamCountsInputs() {
         
         // 個別カウントがない場合はbulkTeamCountを使う
         const count = state.classTeamCounts[cls] !== undefined ? state.classTeamCounts[cls] : state.bulkTeamCount;
+        // 日程グループの取得 (デフォルト: '1')
+        const group = state.classGroups[cls] !== undefined ? state.classGroups[cls] : '1';
 
         row.innerHTML = `
             <span>${cls}クラス</span>
-            <!-- PC用 -->
-            <div class="pc-only inline-wrapper">
-                <input type="number" min="1" max="30" value="${count}" data-class="${cls}" class="class-team-count-input-pc" inputmode="numeric">
-            </div>
-            <!-- スマホ用 -->
-            <div class="mobile-only inline-wrapper">
-                <select data-class="${cls}" class="class-team-count-input-mob">
-                    ${generateOptionsHtml(1, 30, count)}
-                </select>
+            <div class="class-row-controls">
+                <!-- チーム数設定 -->
+                <div class="class-control-item">
+                    <span class="control-label">チーム数:</span>
+                    <!-- PC用 -->
+                    <div class="pc-only inline-wrapper">
+                        <input type="number" min="0" max="30" value="${count}" data-class="${cls}" class="class-team-count-input-pc" inputmode="numeric">
+                    </div>
+                    <!-- スマホ用 -->
+                    <div class="mobile-only inline-wrapper">
+                        <select data-class="${cls}" class="class-team-count-input-mob">
+                            ${generateOptionsHtml(0, 30, count)}
+                        </select>
+                    </div>
+                </div>
+                <!-- 日程グループ設定 -->
+                <div class="class-control-item">
+                    <span class="control-label">日程:</span>
+                    <select data-class="${cls}" class="class-group-select">
+                        <option value="1" ${group === '1' ? 'selected' : ''}>前半</option>
+                        <option value="2" ${group === '2' ? 'selected' : ''}>後半</option>
+                    </select>
+                </div>
             </div>
         `;
         listClassTeamCounts.appendChild(row);
@@ -381,6 +464,7 @@ function renderClassTeamCountsInputs() {
         // イベント登録
         const pcInput = row.querySelector('.class-team-count-input-pc');
         const mobSelect = row.querySelector('.class-team-count-input-mob');
+        const groupSelect = row.querySelector('.class-group-select');
 
         pcInput.addEventListener('input', (e) => {
             mobSelect.value = e.currentTarget.value;
@@ -391,6 +475,11 @@ function renderClassTeamCountsInputs() {
         mobSelect.addEventListener('change', (e) => {
             pcInput.value = e.currentTarget.value;
             handleClassTeamCountChange(e);
+        });
+
+        groupSelect.addEventListener('change', (e) => {
+            state.classGroups[cls] = e.currentTarget.value;
+            saveState();
         });
     });
 
@@ -403,7 +492,7 @@ function handleClassTeamCountChange(e) {
     const cls = input.getAttribute('data-class');
     let val = parseInt(input.value);
 
-    if (isNaN(val) || val < 1) val = 1;
+    if (isNaN(val) || val < 0) val = 0;
     if (val > 30) val = 30; // 異常な数を防ぐ上限設定
 
     state.classTeamCounts[cls] = val;
@@ -435,6 +524,7 @@ function handleStartSetup() {
 
     state.selectedClasses.forEach(cls => {
         const teamCountForClass = state.classTeamCounts[cls] !== undefined ? state.classTeamCounts[cls] : state.bulkTeamCount;
+        if (teamCountForClass === 0) return; // 0チームの場合はスキップ
         
         for (let i = 1; i <= teamCountForClass; i++) {
             // 連番ルールの適用
@@ -514,9 +604,26 @@ function handleConfirmNames() {
 
 // --- 入力セクション ロジック ---
 function renderScoreInputs() {
+    if (!listScoreInputs) return;
     listScoreInputs.innerHTML = '';
     
+    // 日程フィルターの取得 (デフォルト: 'all')
+    const filter = state.activeInputFilter || 'all';
+    // 検索クエリ
+    const query = inputSearchTeam ? inputSearchTeam.value.trim().toLowerCase() : '';
+    
     state.teams.forEach(team => {
+        // 1. 検索一致チェック
+        if (query && !team.name.toLowerCase().includes(query)) {
+            return;
+        }
+
+        // 2. 日程グループ一致チェック
+        const teamGroup = state.classGroups[team.originalClass] || '1';
+        if (filter !== 'all' && teamGroup !== filter) {
+            return;
+        }
+
         const card = document.createElement('div');
         card.className = 'score-card animate-fade-in';
         card.setAttribute('data-team-name', team.name.toLowerCase());
@@ -642,12 +749,21 @@ function handleScoreChange(e) {
 
 // チーム名検索機能
 function handleSearch() {
+    if (!inputSearchTeam) return;
     const query = inputSearchTeam.value.toLowerCase().trim();
+    const filter = state.activeInputFilter || 'all';
     const cards = listScoreInputs.querySelectorAll('.score-card');
 
     cards.forEach(card => {
-        const teamName = card.getAttribute('data-team-name');
-        if (teamName.includes(query)) {
+        const teamId = parseInt(card.getAttribute('data-team-id'));
+        const team = state.teams.find(t => t.id === teamId);
+        if (!team) return;
+
+        const teamGroup = state.classGroups[team.originalClass] || '1';
+        const matchesFilter = (filter === 'all' || teamGroup === filter);
+        const matchesQuery = team.name.toLowerCase().includes(query);
+
+        if (matchesFilter && matchesQuery) {
             card.classList.remove('hidden');
         } else {
             card.classList.add('hidden');
@@ -657,18 +773,32 @@ function handleSearch() {
 
 // --- 順位表セクション ロジック ---
 function renderRanking() {
+    if (!tableRankingBody) return;
     tableRankingBody.innerHTML = '';
 
     if (state.teams.length === 0) {
         return;
     }
 
-    // 学校名・大会名と合計チーム数をタイトルに反映
-    const teamCountText = `(全${state.teams.length}チーム)`;
+    // 集計フィルターの取得
+    const filter = state.activeRankingFilter || 'all';
+
+    // チームの絞り込み
+    let filteredTeams = [...state.teams];
+    if (filter !== 'all') {
+        filteredTeams = filteredTeams.filter(t => {
+            const teamGroup = state.classGroups[t.originalClass] || '1';
+            return teamGroup === filter;
+        });
+    }
+
+    // 学校名・大会名と対象チーム数をタイトルに反映
+    const groupName = filter === '1' ? '【前半】' : (filter === '2' ? '【後半】' : '【総合】');
+    const teamCountText = `(全${filteredTeams.length}チーム)`;
     const title = state.schoolName 
-        ? `${state.schoolName} ${teamCountText} 結果順位表` 
-        : `結果順位表 ${teamCountText}`;
-    printSchoolName.textContent = title;
+        ? `${state.schoolName} ${groupName}${teamCountText} 結果順位表` 
+        : `結果順位表 ${groupName}${teamCountText}`;
+    if (printSchoolName) printSchoolName.textContent = title;
 
     // 出力日を反映
     const today = new Date();
@@ -677,18 +807,29 @@ function renderRanking() {
         printDateEl.textContent = `出力日: ${dateString}`;
     }
 
-    // スコア降順でソート（ディープコピーを作成）
-    const sortedTeams = [...state.teams].sort((a, b) => b.totalScore - a.totalScore);
+    // 得点の高い順にソート (同点の場合はマイナス点が少ない順、それでも同じならID順)
+    filteredTeams.sort((a, b) => {
+        if (b.totalScore !== a.totalScore) {
+            return b.totalScore - a.totalScore;
+        }
+        if (a.penaltyScore !== b.penaltyScore) {
+            return a.penaltyScore - b.penaltyScore;
+        }
+        return a.id - b.id;
+    });
 
     // 順位付け処理 (共同順位対応)
     let currentRank = 1;
     let prevScore = null;
+    let prevPenalty = null;
 
-    sortedTeams.forEach((team, index) => {
-        if (prevScore !== null && team.totalScore !== prevScore) {
+    filteredTeams.forEach((team, index) => {
+        // 同点タイの判定：合計点とマイナス点がいずれも前チームと同じ場合のみ同順位とする
+        if (prevScore !== null && (team.totalScore !== prevScore || team.penaltyScore !== prevPenalty)) {
             currentRank = index + 1;
         }
         prevScore = team.totalScore;
+        prevPenalty = team.penaltyScore;
 
         const tr = document.createElement('tr');
         
@@ -733,23 +874,42 @@ function resetAllData() {
         bulkTeamCount: 6,
         numberRule: 'seq',
         classTeamCounts: {},
+        classGroups: {},
+        activeInputFilter: 'all',
+        activeRankingFilter: 'all',
         teamCount: 48,
         teams: [],
         currentView: 'sec-setup'
     };
     
     // 入力のクリア
-    inputSchoolName.value = '';
-    inputClassCountPc.value = 8;
-    inputClassCountMob.value = 8;
-    inputBulkTeamCountPc.value = 6;
-    inputBulkTeamCountMob.value = 6;
-    divClassDetails.classList.add('hidden');
-    btnToggleDetails.classList.remove('open');
-    listTeamNames.innerHTML = '';
-    divTeamNamesSetup.classList.add('hidden');
-    listScoreInputs.innerHTML = '';
-    inputSearchTeam.value = '';
+    if (inputSchoolName) inputSchoolName.value = '';
+    if (inputClassCountPc) inputClassCountPc.value = 8;
+    if (inputClassCountMob) inputClassCountMob.value = 8;
+    if (inputBulkTeamCountPc) inputBulkTeamCountPc.value = 6;
+    if (inputBulkTeamCountMob) inputBulkTeamCountMob.value = 6;
+    if (divClassDetails) divClassDetails.classList.add('hidden');
+    if (btnToggleDetails) btnToggleDetails.classList.remove('open');
+    if (listTeamNames) listTeamNames.innerHTML = '';
+    if (divTeamNamesSetup) divTeamNamesSetup.classList.add('hidden');
+    if (listScoreInputs) listScoreInputs.innerHTML = '';
+    if (inputSearchTeam) inputSearchTeam.value = '';
+
+    // フィルターボタンとタブのリセット
+    const filterInputBtns = document.querySelectorAll('.btn-filter-group');
+    filterInputBtns.forEach(btn => {
+        if (btn.getAttribute('data-filter') === 'all') btn.classList.add('active');
+        else btn.classList.remove('active');
+    });
+
+    const filterRankingTabs = document.querySelectorAll('.ranking-tab');
+    filterRankingTabs.forEach(tab => {
+        if (tab.getAttribute('data-filter') === 'all') tab.classList.add('active');
+        else tab.classList.remove('active');
+    });
+
+    const subtitleEl = document.getElementById('print-ranking-subtitle');
+    if (subtitleEl) subtitleEl.textContent = '総合';
     
     // 表示のクリア
     tableRankingBody.innerHTML = '';
