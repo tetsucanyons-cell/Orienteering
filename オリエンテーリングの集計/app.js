@@ -494,7 +494,8 @@ function renderScoreInputs() {
             <div class="score-card-inputs">
                 <!-- 基本課題 -->
                 <div class="score-input-group">
-                    <label for="base-${team.id}-pc">基本課題</label>
+                    <label for="base-${team.id}-pc" class="pc-only">基本課題</label>
+                    <label for="base-${team.id}-mob" class="mobile-only">基本課題</label>
                     <div class="pc-only">
                         <input type="number" id="base-${team.id}-pc" class="score-input-pc" data-id="${team.id}" data-type="base" value="${team.baseScore}" inputmode="numeric">
                     </div>
@@ -506,7 +507,8 @@ function renderScoreInputs() {
                 </div>
                 <!-- 特別課題 -->
                 <div class="score-input-group">
-                    <label for="special-${team.id}-pc">特別課題</label>
+                    <label for="special-${team.id}-pc" class="pc-only">特別課題</label>
+                    <label for="special-${team.id}-mob" class="mobile-only">特別課題</label>
                     <div class="pc-only">
                         <input type="number" id="special-${team.id}-pc" class="score-input-pc" data-id="${team.id}" data-type="special" value="${team.specialScore}" inputmode="numeric">
                     </div>
@@ -518,7 +520,8 @@ function renderScoreInputs() {
                 </div>
                 <!-- マイナス点 -->
                 <div class="score-input-group penalty">
-                    <label class="text-danger" for="penalty-${team.id}-pc">マイナス点</label>
+                    <label class="text-danger pc-only" for="penalty-${team.id}-pc">マイナス点</label>
+                    <label class="text-danger mobile-only" for="penalty-${team.id}-mob">マイナス点</label>
                     <div class="pc-only">
                         <input type="number" id="penalty-${team.id}-pc" class="score-input-pc text-danger" data-id="${team.id}" data-type="penalty" value="${team.penaltyScore}" inputmode="numeric">
                     </div>

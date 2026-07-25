@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <!-- Google Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=1.2">
 </head>
 <body>
     <div class="app-container">
@@ -65,7 +65,8 @@
 
                     <!-- クラス数の設定 -->
                     <div class="form-group">
-                        <label for="input-class-count-pc">クラス数 (1〜20)</label>
+                        <label for="input-class-count-pc" class="pc-only">クラス数 (1〜20)</label>
+                        <label for="input-class-count-mob" class="mobile-only">クラス数 (1〜20)</label>
                         <!-- PC用 -->
                         <div class="input-number-wrapper pc-only">
                             <input type="number" id="input-class-count-pc" min="1" max="20" value="8" inputmode="numeric">
@@ -111,7 +112,8 @@
 
                     <!-- 各クラスのチーム数設定（一括設定） -->
                     <div class="form-group">
-                        <label for="input-bulk-team-count-pc">各クラスのチーム数 (一括設定)</label>
+                        <label for="input-bulk-team-count-pc" class="pc-only">各クラスのチーム数 (一括設定)</label>
+                        <label for="input-bulk-team-count-mob" class="mobile-only">各クラスのチーム数 (一括設定)</label>
                         <!-- PC用 -->
                         <div class="input-number-wrapper pc-only">
                             <input type="number" id="input-bulk-team-count-pc" min="1" max="30" value="6" inputmode="numeric">
@@ -304,6 +306,6 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=1.2"></script>
 </body>
 </html>
