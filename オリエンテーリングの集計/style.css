@@ -1066,26 +1066,52 @@ button .material-icons-round {
    Responsive & Hybrid Input Styles (Plan D)
    ========================================================================== */
 
-/* Responsive visibility utilities */
+/* Responsive & Device-based visibility utilities */
+/* 1. Class-based utilities (Forced by JS detection) */
+body.is-mobile .pc-only {
+    display: none !important;
+}
+body.is-mobile .mobile-only {
+    display: block !important;
+}
+body.is-mobile span.mobile-only, 
+body.is-mobile div.mobile-only.inline-wrapper {
+    display: inline-block !important;
+}
+
+body.is-pc .mobile-only {
+    display: none !important;
+}
+body.is-pc .pc-only {
+    display: block !important;
+}
+body.is-pc span.pc-only, 
+body.is-pc div.pc-only.inline-wrapper {
+    display: inline-block !important;
+}
+
+/* 2. Media-query fallback (Responsive design) */
 @media (min-width: 768px) {
-    .mobile-only {
+    body:not(.is-mobile) .mobile-only {
         display: none !important;
     }
-    .pc-only {
+    body:not(.is-mobile) .pc-only {
         display: block !important;
     }
-    span.pc-only, div.pc-only.inline-wrapper {
+    body:not(.is-mobile) span.pc-only, 
+    body:not(.is-mobile) div.pc-only.inline-wrapper {
         display: inline-block !important;
     }
 }
 @media (max-width: 767px) {
-    .mobile-only {
+    body:not(.is-pc) .mobile-only {
         display: block !important;
     }
-    span.mobile-only, div.mobile-only.inline-wrapper {
+    body:not(.is-pc) span.mobile-only, 
+    body:not(.is-pc) div.mobile-only.inline-wrapper {
         display: inline-block !important;
     }
-    .pc-only {
+    body:not(.is-pc) .pc-only {
         display: none !important;
     }
 }

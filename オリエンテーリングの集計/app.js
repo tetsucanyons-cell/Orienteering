@@ -61,8 +61,25 @@ const btnConfirmDelete = document.getElementById('btn-confirm-delete');
 
 // --- 初期化処理 ---
 document.addEventListener('DOMContentLoaded', () => {
+    detectDevice();
     initApp();
+    window.addEventListener('resize', detectDevice);
 });
+
+function detectDevice() {
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isSmallScreen = window.innerWidth < 768;
+    // タッチデバイス、または画面幅768px未満をモバイルと判定
+    const isMobile = isSmallScreen || (isTouch && window.innerWidth < 1024);
+    
+    if (isMobile) {
+        document.body.classList.add('is-mobile');
+        document.body.classList.remove('is-pc');
+    } else {
+        document.body.classList.add('is-pc');
+        document.body.classList.remove('is-mobile');
+    }
+}
 
 function initApp() {
     setupEventListeners();
