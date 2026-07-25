@@ -63,11 +63,11 @@
                         </div>
                     </div>
 
-                    <!-- 対象クラスの選択 -->
+                    <!-- クラス数の設定 -->
                     <div class="form-group">
-                        <label>対象クラスを選択</label>
-                        <div id="grid-class-checkboxes" class="class-checkbox-grid">
-                            <!-- JSで動的にチェックボックスが挿入されます -->
+                        <label for="input-class-count">クラス数 (1〜20)</label>
+                        <div class="input-number-wrapper">
+                            <input type="number" id="input-class-count" min="1" max="20" value="8" inputmode="numeric">
                         </div>
                     </div>
 
@@ -83,11 +83,24 @@
                         </div>
                     </div>
 
-                    <!-- クラス別のチーム数設定 -->
+                    <!-- 各クラスのチーム数設定（一括設定） -->
                     <div class="form-group">
-                        <label>各クラスのチーム数</label>
-                        <div id="list-class-team-counts" class="class-team-counts-list">
-                            <!-- チェックされたクラスのチーム数入力欄がここに表示されます -->
+                        <label for="input-bulk-team-count">各クラスのチーム数 (一括設定)</label>
+                        <div class="input-number-wrapper">
+                            <input type="number" id="input-bulk-team-count" min="1" max="30" value="6" inputmode="numeric">
+                        </div>
+                    </div>
+
+                    <!-- クラス別のチーム数個別設定（アコーディオン） -->
+                    <div class="form-group accordion-group">
+                        <button type="button" id="btn-toggle-details" class="btn-text-secondary btn-accordion-toggle">
+                            <span class="material-icons-round">expand_more</span>
+                            <span>クラス別に個数を変更する</span>
+                        </button>
+                        <div id="div-class-details" class="class-details-content hidden">
+                            <div id="list-class-team-counts" class="class-team-counts-list">
+                                <!-- 動的にチーム数入力欄がここに表示されます -->
+                            </div>
                         </div>
                     </div>
 

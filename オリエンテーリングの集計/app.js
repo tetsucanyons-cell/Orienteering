@@ -6,15 +6,12 @@
 let state = {
     schoolName: '',           // 学校名・大会名
     classType: 'alpha',       // 'alpha' (A, B...) or 'num' (1組, 2組...)
-    selectedClasses: ['A', 'B', 'C', 'D'], // デフォルトで最初の4クラス
+    classCount: 8,            // クラス数 (初期値: 8, 最大: 20)
+    selectedClasses: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'], // クラス名リスト
+    bulkTeamCount: 6,         // 各クラスのチーム数一括設定 (初期値: 6)
     numberRule: 'seq',        // 'seq' (全体連番) or 'reset' (クラスごと)
-    classTeamCounts: {
-        'A': 6, 'B': 6, 'C': 6, 'D': 6,
-        'E': 6, 'F': 6, 'G': 6, 'H': 6,
-        '1組': 6, '2組': 6, '3組': 6, '4組': 6,
-        '5組': 6, '6組': 6, '7組': 6, '8組': 6
-    },
-    teamCount: 24,            // 合計チーム数 (初期値: 4クラス * 6チーム = 24)
+    classTeamCounts: {},      // 個別のクラスチーム数設定（空の場合はbulkTeamCountを使用）
+    teamCount: 48,            // 合計チーム数 (初期値: 8クラス * 6チーム = 48)
     teams: [],
     currentView: 'sec-setup'
 };
@@ -47,7 +44,10 @@ const btnResetAll = document.getElementById('btn-reset-all');
 const inputSchoolName = document.getElementById('input-school-name');
 const printSchoolName = document.getElementById('print-school-name');
 const radioClassTypes = document.getElementsByName('class-type');
-const gridClassCheckboxes = document.getElementById('grid-class-checkboxes');
+const inputClassCount = document.getElementById('input-class-count');
+const inputBulkTeamCount = document.getElementById('input-bulk-team-count');
+const btnToggleDetails = document.getElementById('btn-toggle-details');
+const divClassDetails = document.getElementById('div-class-details');
 const radioNumberRules = document.getElementsByName('number-rule');
 const listClassTeamCounts = document.getElementById('list-class-team-counts');
 const spanTotalTeams = document.getElementById('span-total-teams');
@@ -98,6 +98,15 @@ function setupEventListeners() {
     radioClassTypes.forEach(radio => {
         radio.addEventListener('change', handleClassTypeChange);
     });
+
+    // クラス数変更イベント
+    inputClassCount.addEventListener('input', handleClassCountChange);
+
+    // 一括チーム数変更イベント
+    inputBulkTeamCount.addEventListener('input', handleBulkTeamCountChange);
+
+    // 詳細設定（個別調整）アコーディオン開閉
+    btnToggleDetails.addEventListener('click', toggleClassDetails);
 
     // チーム番号ルール切り替えイベント
     radioNumberRules.forEach(radio => {
@@ -186,6 +195,12 @@ function applyStateToSetupUI() {
         }
     });
 
+    // クラス数の適用
+    inputClassCount.value = state.classCount || 4;
+
+    // 一括チーム数の適用
+    inputBulkTeamCount.value = state.bulkTeamCount || 6;
+
     // 番号ルールラジオボタンの適用
     radioNumberRules.forEach(radio => {
         if (radio.value === state.numberRule) {
@@ -193,11 +208,29 @@ function applyStateToSetupUI() {
         }
     });
 
-    // クラスチェックボックス一覧の描画
-    renderClassCheckboxes();
+    // クラス名リストを生成
+    generateClasses();
 
     // クラスごとのチーム数入力リストの描画
     renderClassTeamCountsInputs();
+}
+
+// クラス名リストを動的生成する
+function generateClasses() {
+    const list = [];
+    const count = Math.min(Math.max(parseInt(state.classCount) || 4, 1), 20);
+    state.classCount = count; // 値の補正
+
+    if (state.classType === 'alpha') {
+        for (let i = 0; i < count; i++) {
+            list.push(String.fromCharCode(65 + i)); // A = 65
+        }
+    } else {
+        for (let i = 1; i <= count; i++) {
+            list.push(`${i}組`);
+        }
+    }
+    state.selectedClasses = list;
 }
 
 // クラスタイプが変更された際の処理
@@ -205,66 +238,45 @@ function handleClassTypeChange(e) {
     const type = e.currentTarget.value;
     state.classType = type;
 
-    // クラスタイプに合わせてデフォルトの選択クラスを設定
-    if (type === 'alpha') {
-        state.selectedClasses = ['A', 'B', 'C', 'D'];
-    } else {
-        state.selectedClasses = ['1組', '2組', '3組', '4組'];
-    }
-
-    renderClassCheckboxes();
+    // クラス一覧の再生成と初期化
+    generateClasses();
     renderClassTeamCountsInputs();
     saveState();
 }
 
-// クラス選択用チェックボックスのレンダリング
-function renderClassCheckboxes() {
-    gridClassCheckboxes.innerHTML = '';
+// クラス数が変更された際の処理
+function handleClassCountChange(e) {
+    let count = parseInt(e.currentTarget.value);
+    if (isNaN(count) || count < 1) count = 1;
+    if (count > 20) count = 20;
+
+    state.classCount = count;
+    generateClasses();
+    renderClassTeamCountsInputs();
+    saveState();
+}
+
+// 一括チーム数が変更された際の処理
+function handleBulkTeamCountChange(e) {
+    let count = parseInt(e.currentTarget.value);
+    if (isNaN(count) || count < 1) count = 1;
+    if (count > 30) count = 30;
+
+    state.bulkTeamCount = count;
     
-    // アルファベット (A〜H) または 組 (1〜8組)
-    const classes = state.classType === 'alpha' 
-        ? ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] 
-        : ['1組', '2組', '3組', '4組', '5組', '6組', '7組', '8組'];
-
-    classes.forEach(cls => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'class-checkbox-item';
-        
-        const isChecked = state.selectedClasses.includes(cls);
-        
-        wrapper.innerHTML = `
-            <input type="checkbox" id="chk-class-${cls}" value="${cls}" ${isChecked ? 'checked' : ''}>
-            <label for="chk-class-${cls}">${cls}</label>
-        `;
-        gridClassCheckboxes.appendChild(wrapper);
-
-        // イベント登録
-        wrapper.querySelector('input').addEventListener('change', handleClassCheckboxChange);
+    // 選択されているすべてのクラスの個別カウントを一括設定値で更新
+    state.selectedClasses.forEach(cls => {
+        state.classTeamCounts[cls] = count;
     });
-}
-
-// クラスチェックボックスの選択変更時の処理
-function handleClassCheckboxChange(e) {
-    const chk = e.currentTarget;
-    const val = chk.value;
-
-    if (chk.checked) {
-        if (!state.selectedClasses.includes(val)) {
-            state.selectedClasses.push(val);
-        }
-    } else {
-        state.selectedClasses = state.selectedClasses.filter(c => c !== val);
-    }
-
-    // 順序を維持するためにソート (A〜H / 1組〜8組)
-    const order = state.classType === 'alpha' 
-        ? ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] 
-        : ['1組', '2組', '3組', '4組', '5組', '6組', '7組', '8組'];
-        
-    state.selectedClasses.sort((a, b) => order.indexOf(a) - order.indexOf(b));
 
     renderClassTeamCountsInputs();
     saveState();
+}
+
+// アコーディオン開閉
+function toggleClassDetails() {
+    const isHidden = divClassDetails.classList.toggle('hidden');
+    btnToggleDetails.classList.toggle('open', !isHidden);
 }
 
 // クラス別のチーム数入力リストのレンダリング
@@ -272,7 +284,7 @@ function renderClassTeamCountsInputs() {
     listClassTeamCounts.innerHTML = '';
 
     if (state.selectedClasses.length === 0) {
-        listClassTeamCounts.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-muted); font-size: 13px;">クラスが選択されていません</div>';
+        listClassTeamCounts.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-muted); font-size: 13px;">クラスが指定されていません</div>';
         updateTotalTeamsDisplay();
         return;
     }
@@ -281,7 +293,8 @@ function renderClassTeamCountsInputs() {
         const row = document.createElement('div');
         row.className = 'class-count-row animate-fade-in';
         
-        const count = state.classTeamCounts[cls] || 6;
+        // 個別カウントがない場合はbulkTeamCountを使う
+        const count = state.classTeamCounts[cls] !== undefined ? state.classTeamCounts[cls] : state.bulkTeamCount;
 
         row.innerHTML = `
             <span>${cls}クラス</span>
@@ -315,7 +328,7 @@ function handleClassTeamCountChange(e) {
 function updateTotalTeamsDisplay() {
     let total = 0;
     state.selectedClasses.forEach(cls => {
-        total += state.classTeamCounts[cls] || 6;
+        total += state.classTeamCounts[cls] !== undefined ? state.classTeamCounts[cls] : state.bulkTeamCount;
     });
     
     state.teamCount = total;
@@ -334,7 +347,7 @@ function handleStartSetup() {
     let globalIndex = 1; // 学年連番用
 
     state.selectedClasses.forEach(cls => {
-        const teamCountForClass = state.classTeamCounts[cls] || 6;
+        const teamCountForClass = state.classTeamCounts[cls] !== undefined ? state.classTeamCounts[cls] : state.bulkTeamCount;
         
         for (let i = 1; i <= teamCountForClass; i++) {
             // 連番ルールの適用
@@ -576,21 +589,22 @@ function resetAllData() {
     state = {
         schoolName: '',
         classType: 'alpha',
-        selectedClasses: ['A', 'B', 'C', 'D'],
+        classCount: 8,
+        selectedClasses: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
+        bulkTeamCount: 6,
         numberRule: 'seq',
-        classTeamCounts: {
-            'A': 6, 'B': 6, 'C': 6, 'D': 6,
-            'E': 6, 'F': 6, 'G': 6, 'H': 6,
-            '1組': 6, '2組': 6, '3組': 6, '4組': 6,
-            '5組': 6, '6組': 6, '7組': 6, '8組': 6
-        },
-        teamCount: 24,
+        classTeamCounts: {},
+        teamCount: 48,
         teams: [],
         currentView: 'sec-setup'
     };
     
     // 入力のクリア
     inputSchoolName.value = '';
+    inputClassCount.value = 8;
+    inputBulkTeamCount.value = 6;
+    divClassDetails.classList.add('hidden');
+    btnToggleDetails.classList.remove('open');
     listTeamNames.innerHTML = '';
     divTeamNamesSetup.classList.add('hidden');
     listScoreInputs.innerHTML = '';

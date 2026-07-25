@@ -381,6 +381,46 @@ button .material-icons-round {
     font-size: 14px;
 }
 
+/* Accordion component */
+.accordion-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.btn-accordion-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: transparent;
+    color: var(--color-primary);
+    font-weight: 500;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    margin: 10px auto 0 auto;
+    width: fit-content;
+}
+
+.btn-accordion-toggle:hover {
+    background: rgba(45, 106, 79, 0.05);
+}
+
+.btn-accordion-toggle.open .material-icons-round {
+    transform: rotate(180deg);
+}
+
+.btn-accordion-toggle .material-icons-round {
+    transition: transform 0.2s ease;
+    margin-left: 0;
+}
+
+.class-details-content {
+    margin-top: 12px;
+    transition: var(--transition-smooth);
+}
+
 /* ==========================================================================
    Score Inputs Card & Grid
    ========================================================================== */
