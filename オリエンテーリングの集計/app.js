@@ -40,6 +40,7 @@ const btnGoToRanking = document.getElementById('btn-go-to-ranking');
 const tableRankingBody = document.getElementById('body-ranking');
 const btnBackToInput = document.getElementById('btn-back-to-input');
 const btnPrint = document.getElementById('btn-print');
+const btnExportCsv = document.getElementById('btn-export-csv');
 const printDateEl = document.getElementById('print-current-date');
 const btnResetAll = document.getElementById('btn-reset-all');
 
@@ -234,6 +235,7 @@ function setupEventListeners() {
 
     // 4. 印刷機能
     btnPrint.addEventListener('click', handlePrint);
+    if (btnExportCsv) btnExportCsv.addEventListener('click', exportRankingToCSV);
 
     // 5. リセット（初期化）機能
     if (btnResetAll) btnResetAll.addEventListener('click', showResetModal);
@@ -854,6 +856,82 @@ function renderRanking() {
 function handlePrint() {
     window.print();
 }
+
+// CSVエクスポートの実行
+function exportRankingToCSV() {
+    if (state.teams.length === 0) return;
+
+    // 集計フィルターの取得
+    const filter = state.activeRankingFilter || 'all';
+
+    // チームの絞り込み
+    let filteredTeams = [...state.teams];
+    if (filter !== 'all') {
+        filteredTeams = filteredTeams.filter(t => {
+            const teamGroup = state.classGroups[t.originalClass] || '1';
+            return teamGroup === filter;
+        });
+    }
+
+    // 得点の高い順にソート (同点の場合はマイナス点が少ない順、それでも同じならID順)
+    filteredTeams.sort((a, b) => {
+        if (b.totalScore !== a.totalScore) {
+            return b.totalScore - a.totalScore;
+        }
+        if (a.penaltyScore !== b.penaltyScore) {
+            return a.penaltyScore - b.penaltyScore;
+        }
+        return a.id - b.id;
+    });
+
+    // CSVヘッダーの作成
+    let csvContent = '順位,チーム名,クラス,基本課題,特別課題,マイナス点,合計点\n';
+
+    // 順位付け処理 (共同順位対応)とCSV行の生成
+    let currentRank = 1;
+    let prevScore = null;
+    let prevPenalty = null;
+
+    filteredTeams.forEach((team, index) => {
+        if (prevScore !== null && (team.totalScore !== prevScore || team.penaltyScore !== prevPenalty)) {
+            currentRank = index + 1;
+        }
+        prevScore = team.totalScore;
+        prevPenalty = team.penaltyScore;
+
+        const row = [
+            currentRank,
+            `"${team.name.replace(/"/g, '""')}"`, // ダブルクォーテーションをエスケープ
+            `"${team.originalClass}"`,
+            team.baseScore,
+            team.specialScore,
+            team.penaltyScore,
+            team.totalScore
+        ].join(',');
+        csvContent += row + '\n';
+    });
+
+    // Excelでの日本語文字化けを防ぐため、BOM (Byte Order Mark) を追加
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
+    
+    // 一時的なダウンロードリンクを生成して実行
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    const groupName = filter === '1' ? '前半日程' : (filter === '2' ? '後半日程' : '総合');
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
+    const filename = `オリエンテーリング順位表_${groupName}_${dateStr}.csv`;
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 
 // --- リセット機能 (モーダルダイアログ) ---
 function showResetModal() {
