@@ -1148,3 +1148,38 @@ button .material-icons-round {
     display: inline-block;
 }
 
+/* Score input card select styling */
+.score-input-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ced4da;
+    border-radius: var(--radius-sm);
+    text-align: right;
+    font-weight: 600;
+    outline: none;
+    background-color: #ffffff;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232b2d42'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 16px;
+    padding-right: 20px;
+    font-size: 14px;
+    color: var(--text-main);
+    transition: var(--transition-smooth);
+}
+
+.score-input-group select:focus {
+    border-color: var(--color-primary);
+}
+
+.score-input-group.penalty select {
+    color: var(--color-danger);
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d90429'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+}
+
+.score-input-group.penalty select:focus {
+    border-color: var(--color-danger);
+}
+

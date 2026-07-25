@@ -492,17 +492,41 @@ function renderScoreInputs() {
             </div>
             
             <div class="score-card-inputs">
+                <!-- 基本課題 -->
                 <div class="score-input-group">
-                    <label for="base-${team.id}">基本課題</label>
-                    <input type="number" id="base-${team.id}" class="score-input" data-id="${team.id}" data-type="base" value="${team.baseScore}" inputmode="numeric">
+                    <label for="base-${team.id}-pc">基本課題</label>
+                    <div class="pc-only">
+                        <input type="number" id="base-${team.id}-pc" class="score-input-pc" data-id="${team.id}" data-type="base" value="${team.baseScore}" inputmode="numeric">
+                    </div>
+                    <div class="mobile-only">
+                        <select id="base-${team.id}-mob" class="score-select-mob" data-id="${team.id}" data-type="base">
+                            ${generateOptionsHtml(0, 150, team.baseScore)}
+                        </select>
+                    </div>
                 </div>
+                <!-- 特別課題 -->
                 <div class="score-input-group">
-                    <label for="special-${team.id}">特別課題</label>
-                    <input type="number" id="special-${team.id}" class="score-input" data-id="${team.id}" data-type="special" value="${team.specialScore}" inputmode="numeric">
+                    <label for="special-${team.id}-pc">特別課題</label>
+                    <div class="pc-only">
+                        <input type="number" id="special-${team.id}-pc" class="score-input-pc" data-id="${team.id}" data-type="special" value="${team.specialScore}" inputmode="numeric">
+                    </div>
+                    <div class="mobile-only">
+                        <select id="special-${team.id}-mob" class="score-select-mob" data-id="${team.id}" data-type="special">
+                            ${generateOptionsHtml(0, 100, team.specialScore)}
+                        </select>
+                    </div>
                 </div>
+                <!-- マイナス点 -->
                 <div class="score-input-group penalty">
-                    <label class="text-danger" for="penalty-${team.id}">マイナス点</label>
-                    <input type="number" id="penalty-${team.id}" class="score-input text-danger" data-id="${team.id}" data-type="penalty" value="${team.penaltyScore}" inputmode="numeric">
+                    <label class="text-danger" for="penalty-${team.id}-pc">マイナス点</label>
+                    <div class="pc-only">
+                        <input type="number" id="penalty-${team.id}-pc" class="score-input-pc text-danger" data-id="${team.id}" data-type="penalty" value="${team.penaltyScore}" inputmode="numeric">
+                    </div>
+                    <div class="mobile-only">
+                        <select id="penalty-${team.id}-mob" class="score-select-mob text-danger" data-id="${team.id}" data-type="penalty">
+                            ${generateOptionsHtml(0, 100, team.penaltyScore)}
+                        </select>
+                    </div>
                 </div>
             </div>
             
@@ -513,14 +537,39 @@ function renderScoreInputs() {
         listScoreInputs.appendChild(card);
     });
 
-    // スコア入力時のリアルタイム計算とデータ保存のイベントバインド
-    const inputs = listScoreInputs.querySelectorAll('.score-input');
-    inputs.forEach(input => {
-        input.addEventListener('input', handleScoreChange);
+    // スコア入力時のリアルタイム計算とデータ保存のイベントバインド (PC用)
+    const pcInputs = listScoreInputs.querySelectorAll('.score-input-pc');
+    pcInputs.forEach(input => {
+        const teamId = input.getAttribute('data-id');
+        const type = input.getAttribute('data-type');
+        const mobSelect = listScoreInputs.querySelector(`#${type}-${teamId}-mob`);
+
+        input.addEventListener('input', (e) => {
+            const val = e.currentTarget.value;
+            if (mobSelect) {
+                mobSelect.value = val;
+            }
+            handleScoreChange(e);
+        });
         
-        // フォーカス時にテキストを全選択して上書きしやすくする (スマホでの快適操作のため)
         input.addEventListener('focus', (e) => {
             e.currentTarget.select();
+        });
+    });
+
+    // スコア入力時のリアルタイム計算とデータ保存のイベントバインド (スマホ用)
+    const mobSelects = listScoreInputs.querySelectorAll('.score-select-mob');
+    mobSelects.forEach(select => {
+        const teamId = select.getAttribute('data-id');
+        const type = select.getAttribute('data-type');
+        const pcInput = listScoreInputs.querySelector(`#${type}-${teamId}-pc`);
+
+        select.addEventListener('change', (e) => {
+            const val = e.currentTarget.value;
+            if (pcInput) {
+                pcInput.value = val;
+            }
+            handleScoreChange(e);
         });
     });
 }
