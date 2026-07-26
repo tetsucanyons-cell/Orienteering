@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <!-- Google Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2.0">
+    <link rel="stylesheet" href="style.css?v=2.1">
 </head>
 <body>
     <div class="app-container">
@@ -102,11 +102,14 @@
                     <div class="form-group">
                         <label>チーム番号のルール</label>
                         <div class="segmented-control">
-                            <input type="radio" id="number-rule-seq" name="number-rule" value="seq" checked>
-                            <label for="number-rule-seq">学年連番 (A-1, A-2, B-3...)</label>
+                            <input type="radio" id="number-rule-seq" name="number-rule" value="seq">
+                            <label for="number-rule-seq">学年連番 (A-1, A-2...)</label>
+                            
+                            <input type="radio" id="number-rule-group" name="number-rule" value="group" checked>
+                            <label for="number-rule-group">日程ごと連番 (前半/後半でリセット)</label>
                             
                             <input type="radio" id="number-rule-reset" name="number-rule" value="reset">
-                            <label for="number-rule-reset">クラスごと (A-1, A-2, B-1...)</label>
+                            <label for="number-rule-reset">クラスごと (A-1, B-1...)</label>
                         </div>
                     </div>
 
@@ -319,6 +322,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=2.0"></script>
+    <script src="app.js?v=2.1"></script>
 </body>
 </html>

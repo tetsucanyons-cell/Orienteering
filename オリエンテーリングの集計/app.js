@@ -9,7 +9,7 @@ let state = {
     classCount: 8,            // クラス数 (初期値: 8, 最大: 20)
     selectedClasses: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'], // クラス名リスト
     bulkTeamCount: 6,         // 各クラスのチーム数一括設定 (初期値: 6)
-    numberRule: 'seq',        // 'seq' (全体連番) or 'reset' (クラスごと)
+    numberRule: 'group',        // 'seq' (全体連番) or 'group' (日程ごと) or 'reset' (クラスごと)
     classTeamCounts: {},      // 個別のクラスチーム数設定（空の場合はbulkTeamCountを使用。0を許容）
     classGroups: {},          // クラスごとの日程グループ。例: { 'A': '1', 'B': '1', 'D': '2' }
     activeInputFilter: 'all', // 得点入力画面での表示フィルター ('all' | '1' | '2')
@@ -518,16 +518,29 @@ function handleStartSetup() {
     // 自動命名ルールの実行
     const generatedTeams = [];
     let globalIndex = 1; // 学年連番用
+    let groupIndices = { '1': 1, '2': 1 }; // 日程グループごとの連番用
 
     state.selectedClasses.forEach(cls => {
         const teamCountForClass = state.classTeamCounts[cls] !== undefined ? state.classTeamCounts[cls] : state.bulkTeamCount;
         if (teamCountForClass === 0) return; // 0チームの場合はスキップ
         
+        // 日程グループの取得 (デフォルト: '1')
+        const group = state.classGroups[cls] !== undefined ? state.classGroups[cls] : '1';
+        
         for (let i = 1; i <= teamCountForClass; i++) {
             // 連番ルールの適用
             // seq (学年連番): A-1, A-2, B-3, B-4...
+            // group (日程ごと連番): 前半・後半日程ごとに連番
             // reset (クラスごと): A-1, A-2, B-1, B-2...
-            const num = state.numberRule === 'seq' ? globalIndex : i;
+            let num;
+            if (state.numberRule === 'seq') {
+                num = globalIndex;
+            } else if (state.numberRule === 'group') {
+                num = groupIndices[group];
+                groupIndices[group]++;
+            } else {
+                num = i;
+            }
             const teamName = `${cls}-${num}`;
 
             generatedTeams.push({
@@ -945,7 +958,7 @@ function resetAllData() {
         classCount: 8,
         selectedClasses: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
         bulkTeamCount: 6,
-        numberRule: 'seq',
+        numberRule: 'group',
         classTeamCounts: {},
         classGroups: {},
         activeInputFilter: 'all',
